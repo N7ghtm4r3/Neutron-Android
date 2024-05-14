@@ -3,4 +3,7 @@
     <string name="title_activity_splashscreen">Splashscreen</string>
     <string name="earnings">Earnings</string>
     <string name="last_month">Last month</string>
+    <string name="revenue">Revenue:</string>
+    <string name="date">Date:</string>
+    <string name="project">Project</string>
 </resources>

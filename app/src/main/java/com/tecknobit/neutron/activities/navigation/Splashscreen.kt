@@ -23,14 +23,26 @@ import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutron.ui.theme.AppTypography
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutroncore.records.revenues.GeneralRevenue.Label
+import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import kotlinx.coroutines.delay
 
 @SuppressLint("CustomSplashScreen")
 class Splashscreen : ComponentActivity() {
 
+    companion object {
+
+        lateinit var PROJECT_LABEL: Label
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            PROJECT_LABEL = Label(
+                getString(R.string.project),
+                ProjectRevenue.PROJECT_LABEL_COLOR
+            )
             NeutronTheme {
                 Box (
                     modifier = Modifier
