@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +23,7 @@ import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutron.ui.theme.AppTypography
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import kotlinx.coroutines.delay
 
 @SuppressLint("CustomSplashScreen")
 class Splashscreen : ComponentActivity() {
@@ -55,14 +58,18 @@ class Splashscreen : ComponentActivity() {
                         )
                     }
                 }
+                LaunchedEffect(key1 = true) {
+                    delay(250)
+                    // TODO: MAKE THE REAL NAVIGATION
+                    startActivity(Intent(this@Splashscreen, MainActivity::class.java))
+                }
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        // TODO: MAKE THE REAL NAVIGATION
-        startActivity(Intent(this, MainActivity::class.java))
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finishAffinity()
+            }
+        })
     }
 
 }
