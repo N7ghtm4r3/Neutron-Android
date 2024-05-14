@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended.android)
     implementation("com.github.N7ghtm4r3:APIManager:2.2.3")
+    implementation("com.tecknobit.neutroncore:Neutron-core:1.0.0")
     implementation(libs.coil.compose)
     implementation(libs.androidx.ui.text.google.fonts)
     testImplementation(libs.junit)
