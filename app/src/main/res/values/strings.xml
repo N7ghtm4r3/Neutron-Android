@@ -6,4 +6,6 @@
     <string name="revenue">Revenue:</string>
     <string name="date">Date:</string>
     <string name="project">Project</string>
+    <string name="title_activity_project_revenue">ProjectRevenueActivity</string>
+    <string name="total_revenues">Total revenues: %1$s%2$s</string>
 </resources>

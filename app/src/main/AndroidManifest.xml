@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="false"
@@ -14,6 +14,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Neutron"
         tools:targetApi="31">
+        <activity
+            android:name=".activities.session.ProjectRevenueActivity"
+            android:exported="false"
+            android:label="@string/title_activity_project_revenue"
+            android:theme="@style/Theme.Neutron" />
         <activity
             android:name=".activities.navigation.Splashscreen"
             android:exported="true"
@@ -31,7 +36,7 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Neutron"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"/>
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
     </application>
 
 </manifest>
