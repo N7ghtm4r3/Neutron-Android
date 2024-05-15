@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,20 +13,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -39,16 +31,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -57,16 +46,21 @@ import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.PROJECT_LABEL
-import com.tecknobit.neutron.ui.backgroundColor
+import com.tecknobit.neutron.ui.GeneralRevenue
+import com.tecknobit.neutron.ui.LabelBadge
+import com.tecknobit.neutron.ui.RevenueInfo
+import com.tecknobit.neutron.ui.SwipeToDeleteContainer
 import com.tecknobit.neutron.ui.getWalletBalance
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.bodyFontFamily
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue.IDENTIFIER_KEY
-import com.tecknobit.neutroncore.records.revenues.GeneralRevenue.Label
+import com.tecknobit.neutroncore.records.revenues.InitialRevenue
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.Revenue
+import com.tecknobit.neutroncore.records.revenues.RevenueLabel
+import com.tecknobit.neutroncore.records.revenues.TicketRevenue
 
 class MainActivity : NeutronActivity() {
 
@@ -89,19 +83,66 @@ class MainActivity : NeutronActivity() {
                     "gag",
                     "Prova",
                     System.currentTimeMillis(),
-                    GeneralRevenue(
+                    InitialRevenue(
                         "gaga",
-                        "Entry",
                         2000.0,
-                        System.currentTimeMillis(),
-                        emptyList(),
-                        null
+                        System.currentTimeMillis()
                     ),
                     listOf(
-                        ProjectRevenue.Ticket(
-                            "gaga",
+                        TicketRevenue(
+                            "g11aga",
+                            "Ciao",
                             1000.0,
-                            1222222L,
+                            System.currentTimeMillis(),
+                            "gaaga",
+                            1715893715000L
+                        ),
+                        TicketRevenue(
+                            "g1aga",
+                            "Ciao",
+                            1000.0,
+                            System.currentTimeMillis(),
+                            "gaaga",
+                            System.currentTimeMillis()
+                        ),
+                        TicketRevenue(
+                            "gaga",
+                            "Ciao",
+                            1000.0,
+                            System.currentTimeMillis(),
+                            "gaaga",
+                            System.currentTimeMillis()
+                        ),
+                        TicketRevenue(
+                            "25gaga",
+                            "Ciao",
+                            1000.0,
+                            System.currentTimeMillis(),
+                            "gaaga",
+                            System.currentTimeMillis()
+                        ),
+                        TicketRevenue(
+                            "24gaga",
+                            "Ciao",
+                            1000.0,
+                            System.currentTimeMillis(),
+                            "gaaga",
+                            System.currentTimeMillis()
+                        ),
+                        TicketRevenue(
+                            "4gaga",
+                            "Ciao",
+                            1000.0,
+                            System.currentTimeMillis(),
+                            "gaaga",
+                            System.currentTimeMillis()
+                        ),
+                        TicketRevenue(
+                            "3gaga",
+                            "Ciao",
+                            1000.0,
+                            System.currentTimeMillis(),
+                            "gaaga",
                             System.currentTimeMillis()
                         )
                     )
@@ -114,17 +155,17 @@ class MainActivity : NeutronActivity() {
                     100000.0,
                     System.currentTimeMillis(),
                     listOf(
-                        Label(
+                        RevenueLabel(
                             "ff",
                             "Prog",
                             "#33A396"
                         ),
-                        Label(
+                        RevenueLabel(
                             "sff",
                             "Proggag",
                             "#8BAEA2"
                         ),
-                        Label(
+                        RevenueLabel(
                             "sffa",
                             "cfnafna",
                             "#59EC21"
@@ -241,13 +282,29 @@ class MainActivity : NeutronActivity() {
                                         key = { it.id }
                                     ) { revenue ->
                                         if(revenue is GeneralRevenue) {
-                                            GeneralRevenue(
-                                                revenue = revenue
-                                            )
+                                            SwipeToDeleteContainer(
+                                                item = revenue,
+                                                onDelete = {
+                                                    // TODO: MAKE REQUEST THEN
+                                                    revenues.remove(revenue)
+                                                }
+                                            ) {
+                                                GeneralRevenue(
+                                                    revenue = revenue
+                                                )
+                                            }
                                         } else {
-                                            ProjectRevenue(
-                                                revenue = revenue as ProjectRevenue
-                                            )
+                                            SwipeToDeleteContainer(
+                                                item = revenue,
+                                                onDelete = {
+                                                    // TODO: MAKE REQUEST THEN
+                                                    revenues.remove(revenue)
+                                                }
+                                            ) {
+                                                ProjectRevenue(
+                                                    revenue = revenue as ProjectRevenue
+                                                )
+                                            }
                                         }
                                         HorizontalDivider()
                                     }
@@ -268,79 +325,19 @@ class MainActivity : NeutronActivity() {
     }
 
     @Composable
-    private fun GeneralRevenue(
-        revenue: GeneralRevenue
-    ) {
-        var descriptionDisplayed by remember { mutableStateOf(false) }
-        ListItem(
-            headlineContent = {
-                Text(
-                    text = revenue.title,
-                    fontSize = 20.sp
-                )
-            },
-            supportingContent = {
-                RevenueInfo(
-                    revenue = revenue
-                )
-            },
-            trailingContent = {
-                Column {
-                    LazyRow (
-                        modifier = Modifier
-                            .widthIn(
-                                max = 100.dp
-                            ),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        items(
-                            items = revenue.labels,
-                            key = { it.id }
-                        ) { label ->
-                            LabelBadge(
-                                label = label
-                            )
-                        }
-                    }
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.End),
-                        onClick = { descriptionDisplayed = !descriptionDisplayed }
-                    ) {
-                        Icon(
-                            modifier = Modifier
-                                .size(40.dp),
-                            imageVector = if(descriptionDisplayed)
-                                Icons.Default.KeyboardArrowUp
-                            else
-                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null
-                        )
-                    }
-                }
-            }
-        )
-        AnimatedVisibility(
-            visible = descriptionDisplayed
-        ) {
-            Text(
-                modifier = Modifier
-                    .padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = 16.dp
-                    ),
-                text = revenue.description,
-                textAlign = TextAlign.Justify
-            )
-        }
-    }
-
-    @Composable
     private fun ProjectRevenue(
         revenue: ProjectRevenue
     ) {
+        val navToProject = {
+            val intent = Intent(this@MainActivity, ProjectRevenueActivity::class.java)
+            intent.putExtra(IDENTIFIER_KEY, revenue.id)
+            startActivity(intent)
+        }
         ListItem(
+            modifier = Modifier
+                .clickable {
+                    navToProject.invoke()
+                },
             headlineContent = {
                 Text(
                     text = revenue.title,
@@ -360,11 +357,7 @@ class MainActivity : NeutronActivity() {
                     IconButton(
                         modifier = Modifier
                             .align(Alignment.End),
-                        onClick = {
-                            val intent = Intent(this@MainActivity, ProjectRevenueActivity::class.java)
-                            intent.putExtra(IDENTIFIER_KEY, revenue.id)
-                            startActivity(intent)
-                        }
+                        onClick = { navToProject.invoke() }
                     ) {
                         Icon(
                             modifier = Modifier
@@ -376,58 +369,6 @@ class MainActivity : NeutronActivity() {
                 }
             }
         )
-    }
-
-    @Composable
-    private fun RevenueInfo(
-        revenue: Revenue
-    ) {
-        Column {
-            Row (
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.revenue)
-                )
-                Text(
-                    text = "${revenue.value}$currency",
-                    fontFamily = displayFontFamily
-                )
-            }
-            Row (
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.date)
-                )
-                Text(
-                    text = revenue.revenueDate,
-                    fontFamily = displayFontFamily
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun LabelBadge(
-        label: Label
-    ) {
-        Card (
-            colors = CardDefaults.cardColors(
-                containerColor = label.color.backgroundColor()
-            ),
-            shape = RoundedCornerShape(
-                size = 5.dp
-            )
-        ) {
-            Text(
-                modifier = Modifier
-                    .padding(
-                        all = 5.dp
-                    ),
-                text = label.text
-            )
-        }
     }
 
 }

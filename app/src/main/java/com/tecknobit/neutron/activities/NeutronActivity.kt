@@ -13,23 +13,26 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 abstract class NeutronActivity : ComponentActivity() {
 
     @Composable
     protected fun DisplayContent(
+        modifier: Modifier = Modifier,
+        cardHeight: Dp = 140.dp,
         cardContent: @Composable ColumnScope.() -> Unit,
         uiContent: @Composable ColumnScope.() -> Unit
     ) {
         Column (
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
         ) {
             Card (
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .height(cardHeight),
                 shape = RoundedCornerShape(
                     size = 0.dp
                 ),
