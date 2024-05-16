@@ -15,10 +15,17 @@
         android:theme="@style/Theme.Neutron"
         tools:targetApi="31">
         <activity
+            android:name=".activities.session.AddRevenueActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Neutron"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+        <activity
             android:name=".activities.session.ProjectRevenueActivity"
             android:exported="false"
-            android:label="@string/title_activity_project_revenue"
-            android:theme="@style/Theme.Neutron" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Neutron"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".activities.navigation.Splashscreen"
             android:exported="true"
@@ -33,7 +40,7 @@
         </activity>
         <activity
             android:name=".activities.session.MainActivity"
-            android:exported="true"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Neutron"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />

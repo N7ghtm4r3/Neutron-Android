@@ -13,4 +13,5 @@
     <string name="closing_date">Closing date:</string>
     <string name="duration">Duration:</string>
     <string name="days">days</string>
+    <string name="title_activity_add_revenue">AddRevenueActivity</string>
 </resources>

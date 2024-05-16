@@ -193,7 +193,7 @@ class MainActivity : NeutronActivity() {
                     floatingActionButton = {
                         FloatingActionButton(
                             onClick = {
-                                // TODO: MAKE THE ACTION
+                                startActivity(Intent(this, AddRevenueActivity::class.java))
                             }
                         ) {
                            Icon(
