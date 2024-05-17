@@ -5,6 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,29 +32,37 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecknobit.apimanager.annotations.Wrapper
+import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.currency
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 
 class AddRevenueActivity : ComponentActivity() {
+
+    private lateinit var showKeyboard: MutableState<Boolean>
 
     private lateinit var revenueValue: MutableState<String>
 
@@ -62,6 +73,7 @@ class AddRevenueActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            showKeyboard = remember { mutableStateOf(true) }
             revenueValue = remember { mutableStateOf("0") }
             NeutronTheme {
                 Scaffold (
@@ -125,6 +137,7 @@ class AddRevenueActivity : ComponentActivity() {
                             )
                         ) {
                             Keyboard()
+                            InputForm()
                         }
                     }
                 }
@@ -134,80 +147,114 @@ class AddRevenueActivity : ComponentActivity() {
 
     @Composable
     private fun Keyboard() {
-        Column (
-            modifier = Modifier
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Center
+        AnimatedVisibility(
+            visible = showKeyboard.value,
+            enter = fadeIn(),
+            exit = fadeOut()
         ) {
-            LazyColumn {
-                repeat(3) { j ->
-                    item {
-                        Row (
-                            modifier = Modifier
-                                .height(100.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            repeat(3) { i ->
-                                NumberKeyboardButton(
-                                    modifier = Modifier
-                                        .weight(1f),
-                                    number = (j * 3) + i + 1
-                                )
+            Column (
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
+                verticalArrangement = Arrangement.Center
+            ) {
+                LazyColumn {
+                    repeat(3) { j ->
+                        item {
+                            Row (
+                                modifier = Modifier
+                                    .height(100.dp)
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                repeat(3) { i ->
+                                    NumberKeyboardButton(
+                                        modifier = Modifier
+                                            .weight(1f),
+                                        number = (j * 3) + i + 1
+                                    )
+                                }
                             }
                         }
                     }
-                }
-                item {
-                    Row (
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxSize(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ActionButton(
+                    item {
+                        Row (
                             modifier = Modifier
-                                .padding(
-                                    start = 25.dp
-                                ),
-                            action = {
-                                if(digits.isNotEmpty()) {
-                                    if(revenueValue.value.last() == '.')
+                                .weight(1f)
+                                .fillMaxSize(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            ActionButton(
+                                modifier = Modifier
+                                    .padding(
+                                        start = 20.dp
+                                    ),
+                                action = {
+                                    if(digits.isNotEmpty()) {
+                                        if(revenueValue.value.last() == '.')
+                                            revenueValue.value = revenueValue.value.removeSuffix(".")
+                                        else {
+                                            val digit = digits.removeLast()
+                                            revenueValue.value = if(revenueValue.value.contains("."))
+                                                revenueValue.value.removeSuffix(digit.toString())
+                                            else
+                                                ((revenueValue.value.toInt() - digit) / 10).toString()
+                                        }
+                                    } else if(revenueValue.value.last() == '.')
                                         revenueValue.value = revenueValue.value.removeSuffix(".")
-                                    else {
-                                        val digit = digits.removeLast()
-                                        revenueValue.value = if(revenueValue.value.contains("."))
-                                            revenueValue.value.removeSuffix(digit.toString())
-                                        else
-                                            ((revenueValue.value.toInt() - digit) / 10).toString()
-                                    }
-                                } else if(revenueValue.value.last() == '.')
-                                    revenueValue.value = revenueValue.value.removeSuffix(".")
-                            },
-                            icon = Icons.AutoMirrored.Filled.Backspace
-                        )
-                        NumberKeyboardButton(
+                                },
+                                icon = Icons.AutoMirrored.Filled.Backspace
+                            )
+                            NumberKeyboardButton(
+                                modifier = Modifier
+                                    .padding(
+                                        start = 40.dp
+                                    )
+                                    .weight(1f),
+                                number = 0
+                            )
+                            KeyboardButton(
+                                modifier = Modifier
+                                    .padding(
+                                        start = 15.dp
+                                    )
+                                    .weight(1f),
+                                onClick = {
+                                    if(!revenueValue.value.contains("."))
+                                        revenueValue.value += "."
+                                },
+                                text = ".",
+                                fontSize = 50.sp
+                            )
+                        }
+                    }
+                    item {
+                        Button(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .padding(
-                                    start = 45.dp
+                                    top = 25.dp,
+                                    start = 16.dp,
+                                    end = 16.dp
                                 )
-                                .weight(1f),
-                            number = 0
-                        )
-                        KeyboardButton(
-                            modifier = Modifier
-                                .padding(
-                                    start = 15.dp
-                                )
-                                .weight(1f),
+                                .height(60.dp),
+                            shape = RoundedCornerShape(
+                                size = 15.dp
+                            ),
                             onClick = {
-                                if(!revenueValue.value.contains("."))
-                                    revenueValue.value += "."
-                            },
-                            text = ".",
-                            fontSize = 50.sp
-                        )
+                                if(revenueValue.value != "0")
+                                    showKeyboard.value = !showKeyboard.value
+                            }
+                        ) {
+                            Text(
+                                text = stringResource(R.string.next),
+                                fontSize = 18.sp
+                            )
+                        }
                     }
                 }
             }
@@ -273,6 +320,71 @@ class AddRevenueActivity : ComponentActivity() {
                 contentDescription = null,
                 tint = Color.White
             )
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun InputForm() {
+        AnimatedVisibility(
+            visible = !showKeyboard.value,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Column (
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
+                verticalArrangement = Arrangement.Center
+            ) {
+                var isProjectRevenue by remember { mutableStateOf(false) }
+                SingleChoiceSegmentedButtonRow (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 30.dp,
+                            end = 50.dp
+                        )
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    IconButton(
+                        onClick = { showKeyboard.value = !showKeyboard.value}
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    SegmentedButton(
+                        selected = !isProjectRevenue,
+                        onClick = { isProjectRevenue = !isProjectRevenue },
+                        shape = RoundedCornerShape(
+                            topStart = 10.dp,
+                            bottomStart = 10.dp
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.general_revenue)
+                        )
+                    }
+                    SegmentedButton(
+                        selected = isProjectRevenue,
+                        onClick = { isProjectRevenue = !isProjectRevenue },
+                        shape = RoundedCornerShape(
+                            topEnd = 10.dp,
+                            bottomEnd = 10.dp
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.project)
+                        )
+                    }
+                }
+            }
         }
     }
 

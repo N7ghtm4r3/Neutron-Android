@@ -1,17 +1,16 @@
 <resources>
     <string name="app_name">Neutron</string>
-    <string name="title_activity_splashscreen">Splashscreen</string>
     <string name="earnings">Earnings</string>
     <string name="last_month">Last month</string>
     <string name="revenue">Revenue:</string>
     <string name="date">Date:</string>
     <string name="project">Project</string>
-    <string name="title_activity_project_revenue">ProjectRevenueActivity</string>
     <string name="total_revenues">Total revenues: %1$s%2$s</string>
     <string name="initial_revenue">Initial revenue</string>
     <string name="opening_date">Opening date:</string>
     <string name="closing_date">Closing date:</string>
     <string name="duration">Duration:</string>
     <string name="days">days</string>
-    <string name="title_activity_add_revenue">AddRevenueActivity</string>
+    <string name="next">Next</string>
+    <string name="general_revenue">General</string>
 </resources>
