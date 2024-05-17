@@ -13,4 +13,12 @@
     <string name="days">days</string>
     <string name="next">Next</string>
     <string name="general_revenue">General</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="add_revenue">Add revenue</string>
+    <string name="insertion_date">Insertion date</string>
+    <string name="insertion_time">Insertion time</string>
+    <string name="edit">Edit</string>
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

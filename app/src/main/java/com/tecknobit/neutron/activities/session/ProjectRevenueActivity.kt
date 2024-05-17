@@ -129,7 +129,7 @@ class ProjectRevenueActivity : NeutronActivity() {
                             },
                             uiContent = {
                                 // TODO: USE projectRevenue.value INSTEAD
-                                val tickets = currentProjectRevenue.tickets.toMutableList()
+                                val tickets = projectRevenue.value.tickets.toMutableList()
                                 LazyColumn {
                                     item {
                                         GeneralRevenue(

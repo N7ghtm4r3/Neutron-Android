@@ -3,6 +3,7 @@ package com.tecknobit.neutron.activities.session
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.text.format.DateFormat.is24HourFormat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
@@ -12,22 +13,31 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,8 +46,12 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -49,16 +63,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecknobit.apimanager.annotations.Wrapper
+import com.tecknobit.apimanager.formatters.TimeFormatter
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.currency
+import com.tecknobit.neutron.ui.NeutronButton
+import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import java.util.Calendar
 
 class AddRevenueActivity : ComponentActivity() {
 
@@ -84,9 +103,7 @@ class AddRevenueActivity : ComponentActivity() {
                             ),
                             navigationIcon = {
                                 IconButton(
-                                    onClick = {
-                                        startActivity(Intent(this, MainActivity::class.java))
-                                    }
+                                    onClick = { navBack() }
                                 ) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -233,28 +250,19 @@ class AddRevenueActivity : ComponentActivity() {
                         }
                     }
                     item {
-                        Button(
+                        NeutronButton(
                             modifier = Modifier
-                                .fillMaxWidth()
                                 .padding(
                                     top = 25.dp,
                                     start = 16.dp,
                                     end = 16.dp
-                                )
-                                .height(60.dp),
-                            shape = RoundedCornerShape(
-                                size = 15.dp
-                            ),
+                                ),
                             onClick = {
                                 if(revenueValue.value != "0")
                                     showKeyboard.value = !showKeyboard.value
-                            }
-                        ) {
-                            Text(
-                                text = stringResource(R.string.next),
-                                fontSize = 18.sp
-                            )
-                        }
+                            },
+                            text = R.string.next
+                        )
                     }
                 }
             }
@@ -331,24 +339,43 @@ class AddRevenueActivity : ComponentActivity() {
             enter = fadeIn(),
             exit = fadeOut()
         ) {
+            val revenueTitle = remember { mutableStateOf("") }
+            val revenueDescription = remember { mutableStateOf("") }
+            val calendar = Calendar.getInstance()
+            val formatter = TimeFormatter.getInstance()
+            var displayDatePickerDialog by remember { mutableStateOf(false) }
+            val dateFormat = "dd/MM/yyyy";
+            var currentDate by remember { mutableStateOf(formatter.formatAsNowString(dateFormat)) }
+            val dateState = rememberDatePickerState(
+                initialSelectedDateMillis = System.currentTimeMillis()
+            )
+            val timeFormat = "HH:mm:ss"
+            val displayTimePickerDialog = remember { mutableStateOf(false) }
+            var currentTime by remember { mutableStateOf(formatter.formatAsNowString(timeFormat)) }
+            val timePickerState = rememberTimePickerState(
+                initialHour = if(is24HourFormat(LocalContext.current))
+                    calendar.get(Calendar.HOUR_OF_DAY)
+                else
+                    calendar.get(Calendar.HOUR),
+                initialMinute = calendar.get(Calendar.MINUTE)
+            )
             Column (
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(
-                        start = 16.dp,
-                        end = 16.dp
-                    ),
-                verticalArrangement = Arrangement.Center
+                        top = 25.dp,
+                        start = 32.dp,
+                        end = 32.dp,
+                        bottom = 25.dp,
+                    )
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 var isProjectRevenue by remember { mutableStateOf(false) }
                 SingleChoiceSegmentedButtonRow (
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            start = 30.dp,
-                            end = 50.dp
-                        )
-                        .align(Alignment.CenterHorizontally)
                 ) {
                     IconButton(
                         onClick = { showKeyboard.value = !showKeyboard.value}
@@ -384,8 +411,164 @@ class AddRevenueActivity : ComponentActivity() {
                         )
                     }
                 }
+                NeutronOutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    value = revenueTitle,
+                    label = R.string.title
+                )
+                if(!isProjectRevenue) {
+                    NeutronOutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(
+                                max = 250.dp
+                            ),
+                        value = revenueDescription,
+                        label = R.string.description,
+                        isTextArea = true
+                    )
+                }
+                TimeInfo(
+                    info = R.string.insertion_date,
+                    infoValue = currentDate,
+                    onClick = { displayDatePickerDialog = true }
+                )
+                if(displayDatePickerDialog) {
+                    DatePickerDialog(
+                        onDismissRequest = { displayDatePickerDialog = !displayDatePickerDialog },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    currentDate = formatter.formatAsString(
+                                        dateState.selectedDateMillis!!,
+                                        dateFormat
+                                    )
+                                    displayDatePickerDialog = false
+                                }
+                            ) {
+                                Text(
+                                    text = getString(R.string.confirm)
+                                )
+                            }
+                        }
+                    ) {
+                        DatePicker(
+                            state = dateState
+                        )
+                    }
+                }
+                TimeInfo(
+                    info = R.string.insertion_time,
+                    infoValue = currentTime,
+                    onClick = { displayTimePickerDialog.value = true }
+                )
+                TimePickerDialog(
+                    showTimePicker = displayTimePickerDialog,
+                    timeState = timePickerState,
+                    confirmAction = {
+                        currentTime = "${timePickerState.hour}:${timePickerState.minute}:00"
+                        displayTimePickerDialog.value = false
+                    }
+                )
+                NeutronButton(
+                    onClick = {
+                        // TODO: MAKE THE REQUEST THEN
+                        navBack()
+                    },
+                    text = R.string.add_revenue
+                )
             }
         }
+    }
+
+    @Composable
+    private fun TimeInfo(
+        info: Int,
+        infoValue: String,
+        onClick: () -> Unit
+    ) {
+        Column (
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(info),
+                fontSize = 18.sp
+            )
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        bottom = 5.dp
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Text(
+                    text = infoValue,
+                    fontSize = 20.sp,
+                    fontFamily = displayFontFamily
+                )
+                Button(
+                    modifier = Modifier
+                        .height(25.dp),
+                    onClick = onClick,
+                    shape = RoundedCornerShape(5.dp),
+                    contentPadding = PaddingValues(
+                        start = 10.dp,
+                        end = 10.dp,
+                        top = 0.dp,
+                        bottom = 0.dp
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(2.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.edit),
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            HorizontalDivider()
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun TimePickerDialog(
+        showTimePicker: MutableState<Boolean>,
+        timeState: TimePickerState,
+        confirmAction: () -> Unit
+    ) {
+        if (showTimePicker.value) {
+            AlertDialog(
+                onDismissRequest = { showTimePicker.value = false },
+                title = {},
+                text = { TimePicker(state = timeState) },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showTimePicker.value = false }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.dismiss)
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = confirmAction
+                    ) {
+                        Text(
+                            text = stringResource(R.string.confirm)
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    private fun navBack() {
+        startActivity(Intent(this, MainActivity::class.java))
     }
 
 }
