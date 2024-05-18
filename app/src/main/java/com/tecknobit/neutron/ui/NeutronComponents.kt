@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
@@ -23,7 +23,7 @@ fun NeutronOutlinedTextField(
     label: Int,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    OutlinedTextField(
+    TextField(
         modifier = modifier,
         value = value.value,
         onValueChange = onValueChange,

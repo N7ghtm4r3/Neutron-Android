@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,6 +41,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +60,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -73,10 +79,13 @@ import com.tecknobit.apimanager.annotations.Wrapper
 import com.tecknobit.apimanager.formatters.TimeFormatter
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.currency
+import com.tecknobit.neutron.ui.InsertionLabelBadge
 import com.tecknobit.neutron.ui.NeutronButton
 import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
+import com.tecknobit.neutroncore.records.revenues.RevenueLabel
 import java.util.Calendar
 
 class AddRevenueActivity : ComponentActivity() {
@@ -344,7 +353,7 @@ class AddRevenueActivity : ComponentActivity() {
             val calendar = Calendar.getInstance()
             val formatter = TimeFormatter.getInstance()
             var displayDatePickerDialog by remember { mutableStateOf(false) }
-            val dateFormat = "dd/MM/yyyy";
+            val dateFormat = "dd/MM/yyyy"
             var currentDate by remember { mutableStateOf(formatter.formatAsNowString(dateFormat)) }
             val dateState = rememberDatePickerState(
                 initialSelectedDateMillis = System.currentTimeMillis()
@@ -370,7 +379,7 @@ class AddRevenueActivity : ComponentActivity() {
                     )
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
                 var isProjectRevenue by remember { mutableStateOf(false) }
                 SingleChoiceSegmentedButtonRow (
@@ -428,6 +437,7 @@ class AddRevenueActivity : ComponentActivity() {
                         label = R.string.description,
                         isTextArea = true
                     )
+                    Labels()
                 }
                 TimeInfo(
                     info = R.string.insertion_date,
@@ -436,7 +446,16 @@ class AddRevenueActivity : ComponentActivity() {
                 )
                 if(displayDatePickerDialog) {
                     DatePickerDialog(
-                        onDismissRequest = { displayDatePickerDialog = !displayDatePickerDialog },
+                        onDismissRequest = { displayDatePickerDialog = false },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { displayDatePickerDialog = false }
+                            ) {
+                                Text(
+                                    text = getString(R.string.dismiss)
+                                )
+                            }
+                        },
                         confirmButton = {
                             TextButton(
                                 onClick = {
@@ -476,9 +495,88 @@ class AddRevenueActivity : ComponentActivity() {
                         // TODO: MAKE THE REQUEST THEN
                         navBack()
                     },
-                    text = R.string.add_revenue
+                    text = if(isProjectRevenue)
+                        R.string.add_project
+                    else
+                        R.string.add_revenue
                 )
             }
+        }
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    private fun Labels() {
+        val labels = remember { mutableStateListOf<RevenueLabel>(
+            RevenueLabel(
+                "ff",
+                "Prog",
+                "#33A396"
+            ),
+            RevenueLabel(
+                "sff",
+                "Proggag",
+                "#8BAEA2"
+            ),
+            RevenueLabel(
+                "sffa",
+                "cfnafna",
+                "#59EC21"
+            ),
+            RevenueLabel(
+                "ffAGAGA",
+                "Proj",
+                ProjectRevenue.PROJECT_LABEL_COLOR
+            )
+        ) }
+        Column (
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.labels),
+                fontSize = 18.sp
+            )
+            LazyRow (
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(
+                    top = 5.dp,
+                    bottom = 5.dp
+                ),
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                if(labels.size < 5) {
+                    stickyHeader {
+                        FloatingActionButton(
+                            modifier = Modifier
+                                .size(35.dp),
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(
+                                size = 10.dp
+                            ),
+                            onClick = {
+                                // TODO: DISPLAY THE DIALOG TO ADD THE LABELS
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+                items(
+                    items = labels,
+                    key = { it.text }
+                ) { label ->
+                    InsertionLabelBadge(
+                        labels = labels,
+                        label = label
+                    )
+                }
+            }
+            HorizontalDivider()
         }
     }
 

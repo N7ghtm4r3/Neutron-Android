@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -245,6 +247,47 @@ fun LabelBadge(
                 ),
             text = label.text
         )
+    }
+}
+
+@Composable
+fun InsertionLabelBadge(
+    labels: SnapshotStateList<RevenueLabel>,
+    label: RevenueLabel
+) {
+    Card (
+        modifier = Modifier
+            .widthIn(
+                max = 125.dp
+            )
+            .height(35.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = label.color.backgroundColor()
+        ),
+        shape = RoundedCornerShape(
+            size = 5.dp
+        )
+    ) {
+        Row (
+            modifier = Modifier
+                .padding(
+                    start = 10.dp
+                ),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label.text
+            )
+            IconButton(
+                onClick = { labels.remove(label) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.RemoveCircleOutline,
+                    null
+                )
+            }
+        }
     }
 }
 
