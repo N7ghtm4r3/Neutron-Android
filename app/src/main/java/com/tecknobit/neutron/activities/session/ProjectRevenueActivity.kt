@@ -132,7 +132,6 @@ class ProjectRevenueActivity : NeutronActivity() {
                                 )
                             },
                             uiContent = {
-                                // TODO: USE projectRevenue.value INSTEAD
                                 val tickets = projectRevenue.value.tickets.toMutableList()
                                 LazyColumn {
                                     item {
@@ -147,6 +146,13 @@ class ProjectRevenueActivity : NeutronActivity() {
                                         ) { ticket ->
                                             SwipeToDeleteContainer(
                                                 item = ticket,
+                                                onRight = if(!ticket.isClosed) {
+                                                    {
+                                                        // TODO: MAKE REQUEST THEN
+                                                        ticket.isClosed = true
+                                                    }
+                                                } else
+                                                    null,
                                                 onDelete = {
                                                     // TODO: MAKE REQUEST THEN
                                                     tickets.remove(ticket)

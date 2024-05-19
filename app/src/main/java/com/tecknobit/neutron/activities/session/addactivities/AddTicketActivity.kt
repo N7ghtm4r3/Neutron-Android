@@ -9,20 +9,27 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.session.MainActivity
@@ -62,19 +69,23 @@ class AddTicketActivity : AddRevenueActivity() {
         ) {
             revenueTitle = remember { mutableStateOf("") }
             revenueDescription = remember { mutableStateOf("") }
+            var isClosed by remember { mutableStateOf(false) }
             val currentOpeningDate = remember { mutableStateOf(formatter.formatAsNowString(dateFormat)) }
             val currentClosingDate = remember { mutableStateOf(formatter.formatAsNowString(dateFormat)) }
             val displayDatePickerDialog = remember { mutableStateOf(false) }
             val dateState = rememberDatePickerState(
                 initialSelectedDateMillis = System.currentTimeMillis(),
-                selectableDates = object : SelectableDates {
-                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                        return utcTimeMillis <= formatter.formatAsTimestamp(
-                            currentClosingDate.value,
-                            dateFormat
-                        )
+                selectableDates = if(isClosed) {
+                    object : SelectableDates {
+                        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                            return utcTimeMillis <= formatter.formatAsTimestamp(
+                                currentClosingDate.value,
+                                dateFormat
+                            )
+                        }
                     }
-                }
+                } else
+                    DatePickerDefaults.AllDates
             )
             val currentOpeningTime = remember { mutableStateOf(formatter.formatAsNowString(timeFormat)) }
             val displayTimePickerDialog = remember { mutableStateOf(false) }
@@ -105,8 +116,22 @@ class AddTicketActivity : AddRevenueActivity() {
                     )
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Switch(
+                        checked = isClosed,
+                        onCheckedChange = { isClosed = it }
+                    )
+                    Text(
+                        text = stringResource(R.string.closed)
+                    )
+                }
                 NeutronTextField(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -133,16 +158,18 @@ class AddTicketActivity : AddRevenueActivity() {
                     displayTimePickerDialog = displayTimePickerDialog,
                     timePickerState = timeClosingPickerState
                 )
-                TimeInfoSection(
-                    dateTitle = R.string.closing_date_title,
-                    date = currentClosingDate,
-                    displayDatePickerDialog = displayClosingDatePickerDialog,
-                    dateState = dateClosingState,
-                    timeTitle = R.string.closing_time,
-                    time = currentClosingTime,
-                    displayTimePickerDialog = displayClosingTimePickerDialog,
-                    timePickerState = timePickerState
-                )
+                if(isClosed) {
+                    TimeInfoSection(
+                        dateTitle = R.string.closing_date_title,
+                        date = currentClosingDate,
+                        displayDatePickerDialog = displayClosingDatePickerDialog,
+                        dateState = dateClosingState,
+                        timeTitle = R.string.closing_time,
+                        time = currentClosingTime,
+                        displayTimePickerDialog = displayClosingTimePickerDialog,
+                        timePickerState = timePickerState
+                    )
+                }
                 NeutronButton(
                     onClick = {
                         // TODO: MAKE THE REQUEST THEN

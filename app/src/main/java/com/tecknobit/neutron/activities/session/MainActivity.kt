@@ -127,8 +127,7 @@ class MainActivity : NeutronActivity() {
                             "Ciao",
                             1000.0,
                             System.currentTimeMillis(),
-                            "gaaga",
-                            System.currentTimeMillis()
+                            "gaaga"
                         ),
                         TicketRevenue(
                             "4gaga",
@@ -143,8 +142,7 @@ class MainActivity : NeutronActivity() {
                             "Ciao",
                             1000.0,
                             System.currentTimeMillis(),
-                            "gaaga",
-                            System.currentTimeMillis()
+                            "gaaga"
                         )
                     )
                 )

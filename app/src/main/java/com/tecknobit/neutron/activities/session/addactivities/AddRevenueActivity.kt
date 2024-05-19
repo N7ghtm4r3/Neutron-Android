@@ -149,7 +149,7 @@ abstract class AddRevenueActivity: ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
-                                top = 275.dp
+                                top = 250.dp
                             ),
                         shape = RoundedCornerShape(
                             topStart = 50.dp,
