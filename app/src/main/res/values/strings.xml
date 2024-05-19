@@ -23,4 +23,6 @@
     <string name="dismiss">Dismiss</string>
     <string name="add_project">Add project</string>
     <string name="labels">Labels</string>
+    <string name="label_text">Label text</string>
+    <string name="add_label">Add label</string>
 </resources>

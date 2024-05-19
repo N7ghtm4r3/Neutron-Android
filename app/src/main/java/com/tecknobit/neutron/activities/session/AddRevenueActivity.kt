@@ -64,6 +64,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,16 +76,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.tecknobit.apimanager.annotations.Wrapper
 import com.tecknobit.apimanager.formatters.TimeFormatter
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.currency
 import com.tecknobit.neutron.ui.InsertionLabelBadge
 import com.tecknobit.neutron.ui.NeutronButton
-import com.tecknobit.neutron.ui.NeutronOutlinedTextField
+import com.tecknobit.neutron.ui.NeutronTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
-import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.RevenueLabel
 import java.util.Calendar
 
@@ -420,14 +423,14 @@ class AddRevenueActivity : ComponentActivity() {
                         )
                     }
                 }
-                NeutronOutlinedTextField(
+                NeutronTextField(
                     modifier = Modifier
                         .fillMaxWidth(),
                     value = revenueTitle,
                     label = R.string.title
                 )
                 if(!isProjectRevenue) {
-                    NeutronOutlinedTextField(
+                    NeutronTextField(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(
@@ -507,28 +510,7 @@ class AddRevenueActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun Labels() {
-        val labels = remember { mutableStateListOf<RevenueLabel>(
-            RevenueLabel(
-                "ff",
-                "Prog",
-                "#33A396"
-            ),
-            RevenueLabel(
-                "sff",
-                "Proggag",
-                "#8BAEA2"
-            ),
-            RevenueLabel(
-                "sffa",
-                "cfnafna",
-                "#59EC21"
-            ),
-            RevenueLabel(
-                "ffAGAGA",
-                "Proj",
-                ProjectRevenue.PROJECT_LABEL_COLOR
-            )
-        ) }
+        val labels = remember { mutableStateListOf<RevenueLabel>() }
         Column (
             modifier = Modifier
                 .fillMaxWidth()
@@ -541,6 +523,7 @@ class AddRevenueActivity : ComponentActivity() {
                 modifier = Modifier
                     .fillMaxWidth(),
                 contentPadding = PaddingValues(
+                    start = 5.dp,
                     top = 5.dp,
                     bottom = 5.dp
                 ),
@@ -548,6 +531,7 @@ class AddRevenueActivity : ComponentActivity() {
             ) {
                 if(labels.size < 5) {
                     stickyHeader {
+                        val showAddLabel = remember { mutableStateOf(false) }
                         FloatingActionButton(
                             modifier = Modifier
                                 .size(35.dp),
@@ -555,15 +539,17 @@ class AddRevenueActivity : ComponentActivity() {
                             shape = RoundedCornerShape(
                                 size = 10.dp
                             ),
-                            onClick = {
-                                // TODO: DISPLAY THE DIALOG TO ADD THE LABELS
-                            }
+                            onClick = { showAddLabel.value = true }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = null
                             )
                         }
+                        AddLabel(
+                            showAddLabel = showAddLabel,
+                            labels = labels
+                        )
                     }
                 }
                 items(
@@ -662,6 +648,98 @@ class AddRevenueActivity : ComponentActivity() {
                     }
                 }
             )
+        }
+    }
+
+    @Composable
+    private fun AddLabel(
+        showAddLabel: MutableState<Boolean>,
+        labels: SnapshotStateList<RevenueLabel>
+    ) {
+        val controller = rememberColorPickerController()
+        if(showAddLabel.value) {
+            Dialog(
+                onDismissRequest = { showAddLabel.value = false },
+            ) {
+                Card (
+                    shape = RoundedCornerShape(
+                        size = 15.dp
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(
+                                top = 16.dp,
+                                start = 16.dp
+                            ),
+                        text = stringResource(R.string.add_label),
+                        fontFamily = displayFontFamily,
+                        fontSize = 20.sp
+                    )
+                    Column (
+                        modifier = Modifier
+                            .padding(
+                                all = 16.dp
+                            ),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        val labelText = remember { mutableStateOf("") }
+                        var hexColor by remember { mutableStateOf("#FFFFFF") }
+                        InsertionLabelBadge(
+                            label = RevenueLabel(
+                                labelText.value.ifEmpty { stringResource(R.string.label_text) },
+                                hexColor
+                            )
+                        )
+                        NeutronTextField(
+                            modifier = Modifier,
+                            value = labelText,
+                            label = R.string.label_text
+                        )
+                        HsvColorPicker(
+                            modifier = Modifier
+                                .padding(
+                                    top = 10.dp
+                                )
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            controller = controller,
+                            initialColor = Color.White,
+                            onColorChanged = { colorEnvelope -> hexColor = colorEnvelope.hexCode }
+                        )
+                        Row (
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(
+                                onClick = { showAddLabel.value = false }
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.dismiss)
+                                )
+                            }
+                            TextButton(
+                                onClick = {
+                                    labels.add(
+                                        RevenueLabel(
+                                            labelText.value,
+                                            hexColor
+                                        )
+                                    )
+                                    showAddLabel.value = false
+                                }
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.confirm)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
