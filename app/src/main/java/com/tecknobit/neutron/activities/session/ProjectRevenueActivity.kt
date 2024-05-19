@@ -32,11 +32,13 @@ import androidx.compose.ui.unit.sp
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.revenues
+import com.tecknobit.neutron.activities.session.addactivities.AddTicketActivity
 import com.tecknobit.neutron.ui.GeneralRevenue
 import com.tecknobit.neutron.ui.SwipeToDeleteContainer
 import com.tecknobit.neutron.ui.getProjectRevenue
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutroncore.records.NeutronItem.IDENTIFIER_KEY
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 
@@ -95,7 +97,9 @@ class ProjectRevenueActivity : NeutronActivity() {
                         floatingActionButton = {
                             FloatingActionButton(
                                 onClick = {
-                                    // TODO: MAKE THE ACTION
+                                    val intent = Intent(this, AddTicketActivity::class.java)
+                                    intent.putExtra(IDENTIFIER_KEY, currentProjectRevenue.id)
+                                    startActivity(intent)
                                 }
                             ) {
                                 Icon(

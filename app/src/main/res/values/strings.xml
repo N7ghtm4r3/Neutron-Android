@@ -8,7 +8,9 @@
     <string name="total_revenues">Total revenues: %1$s%2$s</string>
     <string name="initial_revenue">Initial revenue</string>
     <string name="opening_date">Opening date:</string>
+    <string name="opening_date_title">Opening date</string>
     <string name="closing_date">Closing date:</string>
+    <string name="closing_date_title">Closing date</string>
     <string name="duration">Duration:</string>
     <string name="days">days</string>
     <string name="next">Next</string>
@@ -25,4 +27,7 @@
     <string name="labels">Labels</string>
     <string name="label_text">Label text</string>
     <string name="add_label">Add label</string>
+    <string name="add_ticket">Add ticket</string>
+    <string name="opening_time">Opening time</string>
+    <string name="closing_time">Closing time</string>
 </resources>

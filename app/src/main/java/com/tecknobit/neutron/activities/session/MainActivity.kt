@@ -46,6 +46,7 @@ import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.PROJECT_LABEL
+import com.tecknobit.neutron.activities.session.addactivities.AddRevenuesActivity
 import com.tecknobit.neutron.ui.GeneralRevenue
 import com.tecknobit.neutron.ui.LabelBadge
 import com.tecknobit.neutron.ui.RevenueInfo
@@ -193,7 +194,7 @@ class MainActivity : NeutronActivity() {
                     floatingActionButton = {
                         FloatingActionButton(
                             onClick = {
-                                startActivity(Intent(this, AddRevenueActivity::class.java))
+                                startActivity(Intent(this, AddRevenuesActivity::class.java))
                             }
                         ) {
                            Icon(

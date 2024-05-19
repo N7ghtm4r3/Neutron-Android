@@ -15,7 +15,14 @@
         android:theme="@style/Theme.Neutron"
         tools:targetApi="31">
         <activity
-            android:name=".activities.session.AddRevenueActivity"
+            android:name=".activities.session.addactivities.AddRevenuesActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Neutron"
+            android:windowSoftInputMode="adjustPan"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
+        <activity
+            android:name=".activities.session.addactivities.AddTicketActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Neutron"
