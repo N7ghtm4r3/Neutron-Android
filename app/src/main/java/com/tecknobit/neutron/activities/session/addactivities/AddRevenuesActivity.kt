@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -277,6 +278,13 @@ class AddRevenuesActivity : AddRevenueActivity() {
                         val labelText = remember { mutableStateOf("") }
                         var hexColor by remember { mutableStateOf("#FFFFFF") }
                         InsertionLabelBadge(
+                            modifier = Modifier
+                                .shadow(
+                                    elevation = 2.dp,
+                                    shape = RoundedCornerShape(
+                                        size = 5.dp
+                                    )
+                                ),
                             label = RevenueLabel(
                                 labelText.value.ifEmpty { stringResource(R.string.label_text) },
                                 hexColor

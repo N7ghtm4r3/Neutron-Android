@@ -21,6 +21,7 @@ abstract class NeutronActivity : ComponentActivity() {
     @Composable
     protected fun DisplayContent(
         modifier: Modifier = Modifier,
+        contentPadding: Dp = 16.dp,
         cardHeight: Dp = 140.dp,
         cardContent: @Composable ColumnScope.() -> Unit,
         uiContent: @Composable ColumnScope.() -> Unit
@@ -47,7 +48,7 @@ abstract class NeutronActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
-                                all = 16.dp
+                                all = contentPadding
                             ),
                         content = cardContent
                     )

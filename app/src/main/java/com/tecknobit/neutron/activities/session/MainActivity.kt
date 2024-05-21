@@ -46,6 +46,7 @@ import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.PROJECT_LABEL
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.activities.session.addactivities.AddRevenuesActivity
 import com.tecknobit.neutron.ui.GeneralRevenue
 import com.tecknobit.neutron.ui.LabelBadge
@@ -248,7 +249,8 @@ class MainActivity : NeutronActivity() {
                                             .size(70.dp)
                                             .clip(CircleShape)
                                             .clickable {
-                                                // TODO: OPEN THE PROFILE
+                                                startActivity(Intent(this@MainActivity,
+                                                    ProfileActivity::class.java))
                                             }
                                             .border(
                                                 width = 1.dp,
@@ -257,7 +259,7 @@ class MainActivity : NeutronActivity() {
                                             ),
                                         contentScale = ContentScale.Crop,
                                         model = ImageRequest.Builder(this@MainActivity)
-                                            .data("https://res.cloudinary.com/momentum-media-group-pty-ltd/image/upload/v1686795211/Space%20Connect/space-exploration-sc_fm1ysf.jpg")
+                                            .data(user.profilePic)
                                             .crossfade(true)
                                             .crossfade(500)
                                             .build(),

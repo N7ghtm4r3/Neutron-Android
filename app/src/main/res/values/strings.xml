@@ -31,4 +31,7 @@
     <string name="opening_time">Opening time</string>
     <string name="closing_time">Closing time</string>
     <string name="closed">Closed</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="language">Language</string>
 </resources>

@@ -23,6 +23,7 @@ import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutron.ui.theme.AppTypography
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutroncore.records.User
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.RevenueLabel
 import kotlinx.coroutines.delay
@@ -33,6 +34,9 @@ class Splashscreen : ComponentActivity() {
     companion object {
 
         lateinit var PROJECT_LABEL: RevenueLabel
+
+        // TODO: TO INIT CORRECTLY
+        val user = User()
 
     }
 
