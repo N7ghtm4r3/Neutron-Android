@@ -31,6 +31,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -400,7 +402,7 @@ private fun SwipeBackground(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    if(isEndToStart)
+                    if (isEndToStart)
                         errorContainerDark
                     else
                         TicketRevenue.CLOSED_TICKET_LABEL_COLOR.backgroundColor()
@@ -451,7 +453,8 @@ fun NeutronTextField(
 fun NeutronButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    text: Int
+    text: Int,
+    colors: ButtonColors = ButtonDefaults.buttonColors()
 ) {
     Button(
         modifier = modifier
@@ -460,6 +463,7 @@ fun NeutronButton(
         shape = RoundedCornerShape(
             size = 15.dp
         ),
+        colors = colors,
         onClick = onClick
     ) {
         Text(

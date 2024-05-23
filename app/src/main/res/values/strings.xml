@@ -35,4 +35,8 @@
     <string name="password">Password</string>
     <string name="language">Language</string>
     <string name="theme">Theme</string>
+    <string name="change">Change</string>
+    <string name="storage_data">Storage data</string>
+    <string name="logout">Logout</string>
+    <string name="delete">Delete</string>
 </resources>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoMode
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,13 +52,16 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
+import com.tecknobit.neutron.activities.navigation.Splashscreen
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
+import com.tecknobit.neutron.ui.NeutronButton
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutron.ui.theme.errorLight
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
-import com.tecknobit.neutroncore.records.User.ApplicationTheme.entries
+import com.tecknobit.neutroncore.records.User.LANGUAGES_SUPPORTED
 
 class ProfileActivity : NeutronActivity() {
 
@@ -150,22 +155,59 @@ class ProfileActivity : NeutronActivity() {
 
                                 }
                             )
+                            val changeLanguage = remember { mutableStateOf(false) }
                             UserInfo(
                                 header = R.string.language,
-                                info = user.language,
-                                onClick = {
-
-                                }
+                                info = LANGUAGES_SUPPORTED[user.language]!!,
+                                onClick = { changeLanguage.value = true }
+                            )
+                            ChangeLanguage(
+                                changeLanguage = changeLanguage
                             )
                             val changeTheme = remember { mutableStateOf(false) }
                             UserInfo(
                                 header = R.string.theme,
                                 info = user.theme.name,
+                                buttonText = R.string.change,
                                 onClick = { changeTheme.value = true }
                             )
                             ChangeTheme(
                                 changeTheme = changeTheme
                             )
+                            UserInfo(
+                                header = R.string.storage_data,
+                                info = user.storage.name,
+                                buttonText = R.string.change,
+                                onClick = {  }
+                            )
+                            Column (
+                                modifier = Modifier
+                                    .padding(
+                                        top = 16.dp,
+                                        start = 32.dp,
+                                        end = 32.dp,
+                                        bottom = 16.dp
+                                    ),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                NeutronButton(
+                                    onClick = {
+                                        // TODO: MAKE THE OPE TO LOGOUT THEN
+                                        navToSplash()
+                                    },
+                                    text = R.string.logout
+                                )
+                                NeutronButton(
+                                    onClick = {
+                                        // TODO: MAKE THE REQUEST THEN
+                                        navToSplash()
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = errorLight
+                                    ),
+                                    text = R.string.delete
+                                )
+                            }
                         }
                     }
                 }
@@ -177,13 +219,14 @@ class ProfileActivity : NeutronActivity() {
     private fun UserInfo(
         header: Int,
         info: String,
+        buttonText: Int = R.string.edit,
         onClick: () -> Unit
     ) {
         Column (
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    all = 16.dp
+                    all = 12.dp
                 )
         ) {
             Text(
@@ -218,7 +261,7 @@ class ProfileActivity : NeutronActivity() {
                     elevation = ButtonDefaults.buttonElevation(2.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.edit),
+                        text = stringResource(buttonText),
                         fontSize = 12.sp
                     )
                 }
@@ -227,59 +270,116 @@ class ProfileActivity : NeutronActivity() {
         HorizontalDivider()
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun ChangeLanguage(
+        changeLanguage: MutableState<Boolean>
+    ) {
+        ChangeInfo(
+            showModal = changeLanguage
+        ) {
+            LANGUAGES_SUPPORTED.keys.forEach { language ->
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            // TODO: MAKE THE REQUEST THEN
+                            user.language = language
+                            changeLanguage.value = false
+                            navToSplash()
+                        }
+                        .padding(
+                            all = 16.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Flag,
+                        contentDescription = null,
+                        tint = if(user.language == language)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            LocalContentColor.current
+                    )
+                    Text(
+                        text = LANGUAGES_SUPPORTED[language]!!,
+                        fontFamily = displayFontFamily
+                    )
+                }
+                HorizontalDivider()
+            }
+        }
+    }
+
     @Composable
     private fun ChangeTheme(
         changeTheme: MutableState<Boolean>
     ) {
-        if(changeTheme.value) {
+        ChangeInfo(
+            showModal = changeTheme
+        ) {
+            ApplicationTheme.entries.forEach { theme ->
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            // TODO: MAKE THE REQUEST THEN
+                            user.theme = theme
+                            changeTheme.value = false
+                            this@ProfileActivity.theme.value = theme
+                        }
+                        .padding(
+                            all = 16.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        imageVector = when(theme) {
+                            Light -> Icons.Default.LightMode
+                            Dark -> Icons.Default.DarkMode
+                            else -> Icons.Default.AutoMode
+                        },
+                        contentDescription = null,
+                        tint = if(user.theme == theme)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            LocalContentColor.current
+                    )
+                    Text(
+                        text = theme.toString(),
+                        fontFamily = displayFontFamily
+                    )
+                }
+                HorizontalDivider()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun ChangeInfo(
+        showModal: MutableState<Boolean>,
+        content: @Composable ColumnScope.() -> Unit
+    ) {
+        if(showModal.value) {
             ModalBottomSheet(
                 sheetState = rememberModalBottomSheetState(),
-                onDismissRequest = { changeTheme.value = false }
+                onDismissRequest = { showModal.value = false }
             ) {
-                Column {
-                    entries.forEach { theme ->
-                        Row (
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    // TODO: MAKE THE REQUEST THEN
-                                    user.theme = theme
-                                    changeTheme.value = false
-                                    this@ProfileActivity.theme.value = theme
-                                }
-                                .padding(
-                                    all = 16.dp
-                                ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Icon(
-                                imageVector = when(theme) {
-                                    Light -> Icons.Default.LightMode
-                                    Dark -> Icons.Default.DarkMode
-                                    else -> Icons.Default.AutoMode
-                                },
-                                contentDescription = null,
-                                tint = if(user.theme == theme)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    LocalContentColor.current
-                            )
-                            Text(
-                                text = theme.toString(),
-                                fontFamily = displayFontFamily
-                            )
-                        }
-                        HorizontalDivider()
-                    }
-                }
+                Column (
+                    content = content
+                )
             }
         }
     }
 
     private fun navBack() {
         startActivity(Intent(this, MainActivity::class.java))
+    }
+
+    private fun navToSplash() {
+        startActivity(Intent(this@ProfileActivity, Splashscreen::class.java))
     }
 
 }
