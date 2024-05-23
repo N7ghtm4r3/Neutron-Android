@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,14 +20,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoMode
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,18 +50,30 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
-import com.tecknobit.neutron.activities.navigation.Splashscreen
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutroncore.records.User.ApplicationTheme
+import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
+import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
+import com.tecknobit.neutroncore.records.User.ApplicationTheme.entries
 
 class ProfileActivity : NeutronActivity() {
+
+    lateinit var theme: MutableState<ApplicationTheme>
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NeutronTheme {
+            theme = remember { mutableStateOf(user.theme) }
+            NeutronTheme (
+                darkTheme = when(theme.value) {
+                    Light -> false
+                    Dark -> true
+                    else -> isSystemInDarkTheme()
+                }
+            ) {
                 Scaffold {
                     DisplayContent(
                         modifier = Modifier
@@ -71,7 +95,7 @@ class ProfileActivity : NeutronActivity() {
                                         },
                                     contentScale = ContentScale.Crop,
                                     model = ImageRequest.Builder(this@ProfileActivity)
-                                        .data(Splashscreen.user.profilePic)
+                                        .data(user.profilePic)
                                         .crossfade(true)
                                         .crossfade(500)
                                         .build(),
@@ -133,6 +157,15 @@ class ProfileActivity : NeutronActivity() {
 
                                 }
                             )
+                            val changeTheme = remember { mutableStateOf(false) }
+                            UserInfo(
+                                header = R.string.theme,
+                                info = user.theme.name,
+                                onClick = { changeTheme.value = true }
+                            )
+                            ChangeTheme(
+                                changeTheme = changeTheme
+                            )
                         }
                     }
                 }
@@ -192,6 +225,57 @@ class ProfileActivity : NeutronActivity() {
             }
         }
         HorizontalDivider()
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun ChangeTheme(
+        changeTheme: MutableState<Boolean>
+    ) {
+        if(changeTheme.value) {
+            ModalBottomSheet(
+                sheetState = rememberModalBottomSheetState(),
+                onDismissRequest = { changeTheme.value = false }
+            ) {
+                Column {
+                    entries.forEach { theme ->
+                        Row (
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // TODO: MAKE THE REQUEST THEN
+                                    user.theme = theme
+                                    changeTheme.value = false
+                                    this@ProfileActivity.theme.value = theme
+                                }
+                                .padding(
+                                    all = 16.dp
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(
+                                imageVector = when(theme) {
+                                    Light -> Icons.Default.LightMode
+                                    Dark -> Icons.Default.DarkMode
+                                    else -> Icons.Default.AutoMode
+                                },
+                                contentDescription = null,
+                                tint = if(user.theme == theme)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    LocalContentColor.current
+                            )
+                            Text(
+                                text = theme.toString(),
+                                fontFamily = displayFontFamily
+                            )
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
     }
 
     private fun navBack() {

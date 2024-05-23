@@ -47,7 +47,9 @@ class Splashscreen : ComponentActivity() {
                 getString(R.string.project),
                 ProjectRevenue.PROJECT_LABEL_COLOR
             )
-            NeutronTheme {
+            NeutronTheme (
+                darkTheme = false
+            ) {
                 Box (
                     modifier = Modifier
                         .fillMaxSize(),
