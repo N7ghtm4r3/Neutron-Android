@@ -27,9 +27,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.RemoveCircleOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -41,11 +43,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue.EndToStart
 import androidx.compose.material3.SwipeToDismissBoxValue.StartToEnd
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -63,7 +67,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -426,6 +432,87 @@ private fun SwipeBackground(
 }
 
 @Composable
+fun NeutronAlertDialog(
+    show: MutableState<Boolean>,
+    icon: ImageVector? = null,
+    onDismissAction: () -> Unit = { show.value = false },
+    title: Int,
+    text: Int,
+    dismissAction: () -> Unit = onDismissAction,
+    dismissText: Int = R.string.dismiss,
+    confirmAction: () -> Unit,
+    confirmText: Int = R.string.confirm
+) {
+    NeutronAlertDialog(
+        show = show,
+        icon = icon,
+        onDismissAction = onDismissAction,
+        title = title,
+        text = {
+            Text(
+                text = stringResource(id = text),
+                textAlign = TextAlign.Justify
+            )
+        },
+        dismissAction = dismissAction,
+        dismissText = dismissText,
+        confirmAction = confirmAction,
+        confirmText = confirmText
+    )
+}
+
+@Composable
+fun NeutronAlertDialog(
+    show: MutableState<Boolean>,
+    icon: ImageVector? = null,
+    onDismissAction: () -> Unit = { show.value = false },
+    title: Int,
+    text: @Composable () -> Unit,
+    dismissAction: () -> Unit = onDismissAction,
+    dismissText: Int = R.string.dismiss,
+    confirmAction: () -> Unit,
+    confirmText: Int = R.string.confirm
+) {
+    if(show.value) {
+        AlertDialog(
+            icon = {
+                if(icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null
+                    )
+                }
+            },
+            onDismissRequest = onDismissAction,
+            title = {
+                Text(
+                    text = stringResource(id = title)
+                )
+            },
+            text = text,
+            dismissButton = {
+                TextButton(
+                    onClick = dismissAction
+                ) {
+                    Text(
+                        text = stringResource(id = dismissText)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = confirmAction
+                ) {
+                    Text(
+                        text = stringResource(id = confirmText)
+                    )
+                }
+            }
+        )
+    }
+}
+
+@Composable
 fun NeutronTextField(
     modifier: Modifier = Modifier,
     value: MutableState<String>,
@@ -445,6 +532,43 @@ fun NeutronTextField(
         },
         singleLine = !isTextArea,
         maxLines = 25,
+        keyboardOptions = keyboardOptions
+    )
+}
+
+@Composable
+fun NeutronOutlinedTextField(
+    modifier: Modifier = Modifier,
+    value: MutableState<String>,
+    isTextArea: Boolean = false,
+    onValueChange: (String) -> Unit = { value.value = it },
+    label: Int,
+    trailingIcon:  @Composable (() -> Unit)? = {
+        IconButton(
+            onClick = { value.value = "" }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Clear,
+                contentDescription = null
+            )
+        }
+    },
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+) {
+    OutlinedTextField(
+        modifier = modifier,
+        value = value.value,
+        onValueChange = onValueChange,
+        label = {
+            Text(
+                text = stringResource(label)
+            )
+        },
+        trailingIcon = trailingIcon,
+        singleLine = !isTextArea,
+        maxLines = 25,
+        visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions
     )
 }

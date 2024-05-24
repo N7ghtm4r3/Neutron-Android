@@ -16,17 +16,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AutoMode
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -35,17 +44,27 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -54,7 +73,9 @@ import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
+import com.tecknobit.neutron.ui.NeutronAlertDialog
 import com.tecknobit.neutron.ui.NeutronButton
+import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.ui.theme.errorLight
@@ -62,6 +83,9 @@ import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
 import com.tecknobit.neutroncore.records.User.LANGUAGES_SUPPORTED
+import com.tecknobit.neutroncore.records.User.UserStorage.Local
+import com.tecknobit.neutroncore.records.User.UserStorage.Online
+import kotlinx.coroutines.delay
 
 class ProfileActivity : NeutronActivity() {
 
@@ -141,18 +165,80 @@ class ProfileActivity : NeutronActivity() {
                             modifier = Modifier
                                 .verticalScroll(rememberScrollState())
                         ) {
+                            val showChangeEmailAlert = remember { mutableStateOf(false) }
+                            var userEmail by remember { mutableStateOf(user.email) }
+                            val newEmail = remember { mutableStateOf("") }
                             UserInfo(
                                 header = R.string.email,
-                                info = user.email,
-                                onClick = {
-
+                                info = userEmail,
+                                onClick = { showChangeEmailAlert.value = true }
+                            )
+                            NeutronAlertDialog(
+                                dismissAction = {
+                                    newEmail.value = ""
+                                    showChangeEmailAlert.value = false
+                                },
+                                icon = Icons.Default.Email,
+                                show = showChangeEmailAlert,
+                                title = R.string.change_email,
+                                text = {
+                                    NeutronOutlinedTextField(
+                                        value = newEmail,
+                                        label = R.string.new_email
+                                    )
+                                },
+                                confirmAction = {
+                                    // TODO: MAKE THE REQUEST AND SAVE IN LOCAL THEN
+                                    userEmail = newEmail.value
+                                    user.email = userEmail
+                                    showChangeEmailAlert.value = false
                                 }
                             )
+                            val showChangePasswordAlert = remember { mutableStateOf(false) }
+                            val newPassword = remember { mutableStateOf("") }
+                            var hiddenPassword by remember { mutableStateOf(true) }
                             UserInfo(
                                 header = R.string.password,
                                 info = "****",
-                                onClick = {
-
+                                onClick = { showChangePasswordAlert.value = true }
+                            )
+                            NeutronAlertDialog(
+                                dismissAction = {
+                                    newPassword.value = ""
+                                    showChangePasswordAlert.value = false
+                                },
+                                icon = Icons.Default.Password,
+                                show = showChangePasswordAlert,
+                                title = R.string.change_password,
+                                text = {
+                                    NeutronOutlinedTextField(
+                                        value = newPassword,
+                                        label = R.string.new_password,
+                                        trailingIcon = {
+                                            IconButton(
+                                                onClick = { hiddenPassword = !hiddenPassword }
+                                            ) {
+                                                Icon(
+                                                    imageVector = if(hiddenPassword)
+                                                        Icons.Default.Visibility
+                                                    else
+                                                        Icons.Default.VisibilityOff,
+                                                    contentDescription = null
+                                                )
+                                            }
+                                        },
+                                        visualTransformation = if(hiddenPassword)
+                                            PasswordVisualTransformation()
+                                        else
+                                            VisualTransformation.None,
+                                        keyboardOptions = KeyboardOptions(
+                                            keyboardType = KeyboardType.Password
+                                        )
+                                    )
+                                },
+                                confirmAction = {
+                                    // TODO: MAKE THE REQUEST AND SAVE IN LOCAL THEN
+                                    showChangePasswordAlert.value = false
                                 }
                             )
                             val changeLanguage = remember { mutableStateOf(false) }
@@ -174,11 +260,15 @@ class ProfileActivity : NeutronActivity() {
                             ChangeTheme(
                                 changeTheme = changeTheme
                             )
+                            val showChangeStorage = remember { mutableStateOf(false) }
                             UserInfo(
                                 header = R.string.storage_data,
                                 info = user.storage.name,
                                 buttonText = R.string.change,
-                                onClick = {  }
+                                onClick = { showChangeStorage.value = true }
+                            )
+                            ChangeStorage(
+                                changeStorage = showChangeStorage
                             )
                             Column (
                                 modifier = Modifier
@@ -190,22 +280,42 @@ class ProfileActivity : NeutronActivity() {
                                     ),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
+                                val showLogoutAlert = remember { mutableStateOf(false) }
+                                val showDeleteAlert = remember { mutableStateOf(false) }
                                 NeutronButton(
                                     onClick = {
-                                        // TODO: MAKE THE OPE TO LOGOUT THEN
-                                        navToSplash()
+                                        showLogoutAlert.value = true
                                     },
                                     text = R.string.logout
                                 )
+                                NeutronAlertDialog(
+                                    icon = Icons.AutoMirrored.Filled.ExitToApp,
+                                    show = showLogoutAlert,
+                                    title = R.string.logout,
+                                    text = R.string.logout_message,
+                                    confirmAction = {
+                                        // TODO: MAKE THE OPE TO LOGOUT THEN
+                                        navToSplash()
+                                    }
+                                )
                                 NeutronButton(
                                     onClick = {
-                                        // TODO: MAKE THE REQUEST THEN
-                                        navToSplash()
+                                        showDeleteAlert.value = true
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = errorLight
                                     ),
                                     text = R.string.delete
+                                )
+                                NeutronAlertDialog(
+                                    icon = Icons.Default.Cancel,
+                                    show = showDeleteAlert,
+                                    title = R.string.delete,
+                                    text = R.string.delete_message,
+                                    confirmAction = {
+                                        // TODO: MAKE THE REQUEST THEN
+                                        navToSplash()
+                                    }
                                 )
                             }
                         }
@@ -270,6 +380,7 @@ class ProfileActivity : NeutronActivity() {
         HorizontalDivider()
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ChangeLanguage(
         changeLanguage: MutableState<Boolean>
@@ -311,6 +422,7 @@ class ProfileActivity : NeutronActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ChangeTheme(
         changeTheme: MutableState<Boolean>
@@ -358,14 +470,139 @@ class ProfileActivity : NeutronActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
+    private fun ChangeStorage(
+        changeStorage: MutableState<Boolean>
+    ) {
+        val currentStorageIsLocal = user.storage == Local
+        val hostAddress = remember { mutableStateOf("") }
+        val serverSecret = remember { mutableStateOf("") }
+        var isExecuting by remember { mutableStateOf(false) }
+        val resetLayout = {
+            hostAddress.value = ""
+            serverSecret.value = ""
+            changeStorage.value = false
+        }
+        ChangeInfo(
+            showModal = changeStorage,
+            sheetState = rememberModalBottomSheetState(
+                confirmValueChange = { !isExecuting }
+            )
+        ) {
+            Column (
+                modifier = Modifier
+                    .padding(
+                        all = 16.dp
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                if(!isExecuting) {
+                    val awareText = stringResource(
+                        if(currentStorageIsLocal)
+                            R.string.aware_server_message
+                        else
+                            R.string.aware_local_message
+                    )
+                    Text(
+                        text = stringResource(R.string.change_storage_location),
+                        fontFamily = displayFontFamily,
+                        fontSize = 20.sp
+                    )
+                    Text(
+                        text = awareText,
+                        textAlign = TextAlign.Justify
+                    )
+                    if(currentStorageIsLocal) {
+                        NeutronOutlinedTextField(
+                            modifier = Modifier
+                                .width(300.dp),
+                            value = hostAddress,
+                            label = R.string.host_address,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            )
+                        )
+                        NeutronOutlinedTextField(
+                            modifier = Modifier
+                                .width(300.dp),
+                            value = serverSecret,
+                            label = R.string.server_secret
+                        )
+                    }
+                } else {
+                    CircularProgressIndicator()
+                    // TODO: MAKE THE REQUEST THEN SET THE LOCAL SESSION
+
+                    // TODO: TO REMOVE AND USE
+                    LaunchedEffect(key1 = true) {
+                        delay(5000L)
+                        user.storage = if(currentStorageIsLocal)
+                            Online
+                        else
+                            Local
+                        navToSplash()
+                    }
+                    // TODO: THIS INSTEAD
+                    //  user.storage = if(currentStorageIsLocal)
+                    //       Online
+                    //  else
+                    //       Local
+                    //  navToSplash()
+                }
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = {
+                            if(isExecuting) {
+                                // TODO: STOP THE TRANSFER THEN
+                                isExecuting = false
+                            } else {
+                                resetLayout.invoke()
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if(isExecuting)
+                                    R.string.cancel
+                                else
+                                    R.string.dismiss
+                            )
+                        )
+                    }
+                    if(!isExecuting) {
+                        TextButton(
+                            onClick = {
+                                // TODO: MAKE THE REQUEST THEN
+                                isExecuting = true
+                            }
+                        ) {
+                            Text(
+                                text = stringResource(R.string.confirm)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
     private fun ChangeInfo(
         showModal: MutableState<Boolean>,
+        sheetState: SheetState = rememberModalBottomSheetState(),
+        onDismissRequest: () -> Unit = { showModal.value = false },
         content: @Composable ColumnScope.() -> Unit
     ) {
         if(showModal.value) {
             ModalBottomSheet(
-                sheetState = rememberModalBottomSheetState(),
-                onDismissRequest = { showModal.value = false }
+                sheetState = sheetState,
+                onDismissRequest = onDismissRequest
             ) {
                 Column (
                     content = content
