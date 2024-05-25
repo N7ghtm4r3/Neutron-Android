@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -71,6 +72,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecknobit.neutron.R
@@ -515,6 +517,7 @@ fun NeutronAlertDialog(
 @Composable
 fun NeutronTextField(
     modifier: Modifier = Modifier,
+    width: Dp = 280.dp,
     value: MutableState<String>,
     isTextArea: Boolean = false,
     onValueChange: (String) -> Unit = { value.value = it },
@@ -522,7 +525,8 @@ fun NeutronTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     TextField(
-        modifier = modifier,
+        modifier = modifier
+            .width(width),
         value = value.value,
         onValueChange = onValueChange,
         label = {
@@ -539,6 +543,7 @@ fun NeutronTextField(
 @Composable
 fun NeutronOutlinedTextField(
     modifier: Modifier = Modifier,
+    width: Dp = 300.dp,
     value: MutableState<String>,
     isTextArea: Boolean = false,
     onValueChange: (String) -> Unit = { value.value = it },
@@ -557,7 +562,8 @@ fun NeutronOutlinedTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     OutlinedTextField(
-        modifier = modifier,
+        modifier = modifier
+            .width(width),
         value = value.value,
         onValueChange = onValueChange,
         label = {

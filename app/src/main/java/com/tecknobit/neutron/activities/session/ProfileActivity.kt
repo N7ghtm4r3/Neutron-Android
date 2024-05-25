@@ -8,9 +8,11 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,11 +36,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AutoMode
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Lan
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -65,6 +71,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -76,6 +83,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen
@@ -96,16 +105,37 @@ import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.util.Random
 import kotlin.math.min
 
 class ProfileActivity : NeutronActivity() {
 
-    lateinit var theme: MutableState<ApplicationTheme>
+    private lateinit var theme: MutableState<ApplicationTheme>
+
+    private lateinit var hostLocalSignIn: MutableState<Boolean>
+
+    private val currentStorageIsLocal = user.storage == Local
+
+    /**
+     * **scanOptions** ->
+     */
+    private val scanOptions = ScanOptions()
+        .setBeepEnabled(false)
+        .setOrientationLocked(false)
+
+    /**
+     * **barcodeLauncher** -> the launcher used to start the scan and use the [scanOptions]
+     */
+    private val barcodeLauncher: ActivityResultLauncher<ScanOptions> =
+        registerForActivityResult(ScanContract()) { result ->
+            // TODO: SHARE THE DATA TO THE QRCODE SCANNED
+        }
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            scanOptions.setPrompt(stringResource(R.string.qr_scanner_prompt_message))
             theme = remember { mutableStateOf(user.theme) }
             var profilePic by remember { mutableStateOf(user.profilePic) }
             val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -146,7 +176,11 @@ class ProfileActivity : NeutronActivity() {
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .clickable {
-                                            photoPickerLauncher.launch(PickVisualMediaRequest(ImageOnly))
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(
+                                                    ImageOnly
+                                                )
+                                            )
                                         },
                                     contentScale = ContentScale.Crop,
                                     model = ImageRequest.Builder(this@ProfileActivity)
@@ -157,19 +191,64 @@ class ProfileActivity : NeutronActivity() {
                                     //TODO: USE THE REAL IMAGE ERROR .error(),
                                     contentDescription = null
                                 )
-                                IconButton(
+                                Row (
                                     modifier = Modifier
-                                        .padding(
-                                            top = 16.dp
-                                        )
-                                        .align(Alignment.TopStart),
-                                    onClick = { navBack() }
+                                        .fillMaxWidth()
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = null,
-                                        tint = Color.White
-                                    )
+                                    Column {
+                                        IconButton(
+                                            modifier = Modifier
+                                                .padding(
+                                                    top = 16.dp
+                                                )
+                                                .align(Alignment.Start),
+                                            onClick = { navBack() }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                contentDescription = null,
+                                                tint = Color.White
+                                            )
+                                        }
+                                    }
+                                    if(currentStorageIsLocal) {
+                                        hostLocalSignIn = remember { mutableStateOf(false) }
+                                        HostLocalSignIn()
+                                        Column (
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            horizontalAlignment = Alignment.End
+                                        ) {
+                                            Row {
+                                                IconButton(
+                                                    modifier = Modifier
+                                                        .padding(
+                                                            top = 16.dp
+                                                        ),
+                                                    onClick = { hostLocalSignIn.value = true }
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Lan,
+                                                        contentDescription = null,
+                                                        tint = Color.White
+                                                    )
+                                                }
+                                                IconButton(
+                                                    modifier = Modifier
+                                                        .padding(
+                                                            top = 16.dp
+                                                        ),
+                                                    onClick = { barcodeLauncher.launch(scanOptions) }
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.QrCodeScanner,
+                                                        contentDescription = null,
+                                                        tint = Color.White
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 Text(
                                     modifier = Modifier
@@ -351,6 +430,110 @@ class ProfileActivity : NeutronActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun HostLocalSignIn() {
+        var isListening by remember { mutableStateOf(true) }
+        if(hostLocalSignIn.value) {
+            ModalBottomSheet(
+                sheetState = rememberModalBottomSheetState(
+                    confirmValueChange = { !isListening }
+                ),
+                onDismissRequest = {
+                    if(!isListening)
+                        hostLocalSignIn.value = false
+                }
+            ) {
+                // TODO: IMPLEMENT THE SOCKETMANAGER OR THE WRAPPER CLASS TO EXECUTE THE HOSTING AND THE DATA TRANSFER
+
+                // TODO: TO REMOVE MAKE THE REAL WORKFLOW INSTEAD
+                LaunchedEffect(
+                    key1 = true
+                ) {
+                    delay(3000L)
+                    isListening = false
+                }
+
+                Column (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    if(isListening) {
+                        Text(
+                            text = stringResource(R.string.hosting_local_sign_in),
+                            fontFamily = displayFontFamily,
+                            fontSize = 20.sp
+                        )
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(
+                                    top = 20.dp
+                                )
+                                .size(75.dp)
+                        )
+                        Text(
+                            modifier = Modifier
+                                .padding(
+                                    top = 10.dp
+                                ),
+                            text = stringResource(R.string.waiting_for_the_request),
+                            fontSize = 14.sp
+                        )
+                    } else {
+                        // TODO: TO REMOVE GET FROM THE REAL REQUEST RESPONSE
+                        val success = Random().nextBoolean()
+                        Image(
+                            modifier = Modifier
+                                .size(125.dp),
+                            imageVector = if(success)
+                                Icons.Default.CheckCircle
+                            else
+                                Icons.Default.Cancel,
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(
+                                color = if(success)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.error
+                            )
+                        )
+                        Text(
+                            text = stringResource(
+                                if (success)
+                                    R.string.sign_in_executed_successfully
+                                else
+                                    R.string.sign_in_failed_message
+                            ),
+                            fontSize = 14.sp
+                        )
+                    }
+                    TextButton(
+                        modifier = Modifier
+                            .align(Alignment.End),
+                        onClick = {
+                            // TODO: CLOSE THE LISTENING THEN
+                            hostLocalSignIn.value = false
+                            isListening = false
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if(isListening)
+                                    R.string.cancel
+                                else
+                                    R.string.close
+                            )
+                        )
+                    }
+                }
+            }
+        } else
+            isListening = true
+    }
+
     @Composable
     private fun UserInfo(
         header: Int,
@@ -499,7 +682,6 @@ class ProfileActivity : NeutronActivity() {
     private fun ChangeStorage(
         changeStorage: MutableState<Boolean>
     ) {
-        val currentStorageIsLocal = user.storage == Local
         val hostAddress = remember { mutableStateOf("") }
         val serverSecret = remember { mutableStateOf("") }
         var isExecuting by remember { mutableStateOf(false) }
@@ -644,7 +826,7 @@ class ProfileActivity : NeutronActivity() {
      * @param uri: the uri of the file
      * @return the path of the file
      */
-    fun getFilePath(
+    private fun getFilePath(
         context: Context,
         uri: Uri
     ): String? {

@@ -15,6 +15,11 @@
         android:theme="@style/Theme.Neutron"
         tools:targetApi="31">
         <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity"
+            tools:replace="screenOrientation" />
+        <activity
             android:name=".activities.session.ConnectActivity"
             android:exported="false"
             android:screenOrientation="portrait"
@@ -25,6 +30,7 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Neutron"
+            android:windowSoftInputMode="adjustPan"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".activities.session.addactivities.AddRevenuesActivity"
