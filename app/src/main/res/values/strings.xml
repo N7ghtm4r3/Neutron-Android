@@ -51,4 +51,9 @@
     <string name="host_address">Host address</string>
     <string name="server_secret">Server secret</string>
     <string name="cancel">Cancel</string>
+    <string name="delete_project">Delete project</string>
+    <string name="delete_project_warn_text">If you confirm the project will be deleted and all the related data will be no more recoverable</string>
+    <string name="hello">Hello!</string>
+    <string name="name">Name</string>
+    <string name="surname">Surname</string>
 </resources>

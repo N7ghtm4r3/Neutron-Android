@@ -1,9 +1,16 @@
 package com.tecknobit.neutron.activities.session
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -86,6 +93,10 @@ import com.tecknobit.neutroncore.records.User.LANGUAGES_SUPPORTED
 import com.tecknobit.neutroncore.records.User.UserStorage.Local
 import com.tecknobit.neutroncore.records.User.UserStorage.Online
 import kotlinx.coroutines.delay
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import kotlin.math.min
 
 class ProfileActivity : NeutronActivity() {
 
@@ -96,6 +107,21 @@ class ProfileActivity : NeutronActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             theme = remember { mutableStateOf(user.theme) }
+            var profilePic by remember { mutableStateOf(user.profilePic) }
+            val photoPickerLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.PickVisualMedia(),
+                onResult = { imageUri ->
+                    if(imageUri != null) {
+                        val imagePath = getFilePath(
+                            context = this@ProfileActivity,
+                            uri = imageUri
+                        )
+                        // TODO: MAKE THE REQUEST THEN
+                        profilePic = imagePath
+                        user.profilePic = imagePath
+                    }
+                }
+            )
             NeutronTheme (
                 darkTheme = when(theme.value) {
                     Light -> false
@@ -120,11 +146,11 @@ class ProfileActivity : NeutronActivity() {
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .clickable {
-                                            // TODO: CHANGE PROFILE PICTURE
+                                            photoPickerLauncher.launch(PickVisualMediaRequest(ImageOnly))
                                         },
                                     contentScale = ContentScale.Crop,
                                     model = ImageRequest.Builder(this@ProfileActivity)
-                                        .data(user.profilePic)
+                                        .data(profilePic)
                                         .crossfade(true)
                                         .crossfade(500)
                                         .build(),
@@ -609,6 +635,48 @@ class ProfileActivity : NeutronActivity() {
                 )
             }
         }
+    }
+
+    /**
+     * Function to get the complete file path of an file
+     *
+     * @param context: the context where the file is needed
+     * @param uri: the uri of the file
+     * @return the path of the file
+     */
+    fun getFilePath(
+        context: Context,
+        uri: Uri
+    ): String? {
+        val returnCursor = context.contentResolver.query(uri, null, null, null, null)
+        val nameIndex =  returnCursor!!.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE)
+        returnCursor.moveToFirst()
+        val name = returnCursor.getString(nameIndex)
+        returnCursor.getLong(sizeIndex).toString()
+        val file = File(context.filesDir, name)
+        try {
+            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+            val outputStream = FileOutputStream(file)
+            var read = 0
+            val maxBufferSize = 1 * 1024 * 1024
+            val bytesAvailable: Int = inputStream?.available() ?: 0
+            val bufferSize = min(bytesAvailable, maxBufferSize)
+            val buffers = ByteArray(bufferSize)
+            while (inputStream?.read(buffers).also {
+                    if (it != null) {
+                        read = it
+                    }
+                } != -1) {
+                outputStream.write(buffers, 0, read)
+            }
+            inputStream?.close()
+            outputStream.close()
+        } catch (_: Exception) {
+        } finally {
+            returnCursor.close()
+        }
+        return file.path
     }
 
     private fun navBack() {

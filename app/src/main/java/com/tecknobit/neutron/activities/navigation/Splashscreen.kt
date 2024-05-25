@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecknobit.neutron.R
-import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutron.activities.session.ConnectActivity
 import com.tecknobit.neutron.ui.theme.AppTypography
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
@@ -79,7 +79,7 @@ class Splashscreen : ComponentActivity() {
                 LaunchedEffect(key1 = true) {
                     delay(250)
                     // TODO: MAKE THE REAL NAVIGATION
-                    startActivity(Intent(this@Splashscreen, MainActivity::class.java))
+                    startActivity(Intent(this@Splashscreen, ConnectActivity::class.java))
                 }
             }
         }

@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.revenues
 import com.tecknobit.neutron.activities.session.addactivities.AddTicketActivity
 import com.tecknobit.neutron.ui.GeneralRevenue
+import com.tecknobit.neutron.ui.NeutronAlertDialog
 import com.tecknobit.neutron.ui.SwipeToDeleteContainer
 import com.tecknobit.neutron.ui.getProjectRevenue
 import com.tecknobit.neutron.ui.theme.NeutronTheme
@@ -46,6 +48,8 @@ class ProjectRevenueActivity : NeutronActivity() {
 
     private lateinit var projectRevenue: MutableState<ProjectRevenue>
 
+    private lateinit var showDeleteProject: MutableState<Boolean>
+
     // TODO: USE THE REAL DATA
     val currency = "€"
 
@@ -57,6 +61,7 @@ class ProjectRevenueActivity : NeutronActivity() {
             val currentProjectRevenue = revenues.getProjectRevenue(
                 intent.getStringExtra(GeneralRevenue.IDENTIFIER_KEY)!!
             )
+            showDeleteProject = remember { mutableStateOf(false) }
             NeutronTheme {
                 if(currentProjectRevenue != null) {
                     projectRevenue = remember { mutableStateOf(currentProjectRevenue) }
@@ -80,10 +85,7 @@ class ProjectRevenueActivity : NeutronActivity() {
                                 title = {},
                                 actions = {
                                     IconButton(
-                                        onClick = {
-                                            // TODO: MAKE THE REQUEST THEN
-                                            navBack()
-                                        }
+                                        onClick = { showDeleteProject.value = true }
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
@@ -91,6 +93,7 @@ class ProjectRevenueActivity : NeutronActivity() {
                                             tint = Color.White
                                         )
                                     }
+                                    DeleteProjectRevenue()
                                 }
                             )
                         },
@@ -176,6 +179,20 @@ class ProjectRevenueActivity : NeutronActivity() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun DeleteProjectRevenue() {
+        NeutronAlertDialog(
+            icon = Icons.Default.Delete,
+            show = showDeleteProject,
+            title = R.string.delete_project,
+            text = R.string.delete_project_warn_text,
+            confirmAction = {
+                // TODO: MAKE THE REQUEST THEN
+                navBack()
+            }
+        )
     }
 
     private fun navBack() {
