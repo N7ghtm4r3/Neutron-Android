@@ -76,6 +76,7 @@ import com.tecknobit.neutron.ui.theme.displayFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.util.Random
 
 class ConnectActivity : ComponentActivity() {
 
@@ -85,6 +86,8 @@ class ConnectActivity : ComponentActivity() {
 
     private lateinit var showQrCodeLogin: MutableState<Boolean>
 
+    private var localDatabaseNotExists: Boolean = true
+
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,11 +95,12 @@ class ConnectActivity : ComponentActivity() {
             isSignUp = remember { mutableStateOf(true) }
             storeDataOnline = remember { mutableStateOf(false) }
             showQrCodeLogin = remember { mutableStateOf(false) }
+            localDatabaseNotExists = Random().nextBoolean() // TODO: TO INIT CORRECTLY FETCHING THE DATABASE
             NeutronTheme {
                 Scaffold (
                     floatingActionButton = {
                         AnimatedVisibility(
-                            visible = !isSignUp.value && !storeDataOnline.value
+                            visible = !isSignUp.value && !storeDataOnline.value && localDatabaseNotExists
                         ) {
                             FloatingActionButton(
                                 onClick = { showQrCodeLogin.value = true }
@@ -280,7 +284,7 @@ class ConnectActivity : ComponentActivity() {
                 }
                 val email = remember { mutableStateOf("") }
                 AnimatedVisibility(
-                    visible = !isSignUp.value && !storeDataOnline.value
+                    visible = !isSignUp.value && !storeDataOnline.value && localDatabaseNotExists
                 ) {
                     Text(
                         modifier = Modifier
