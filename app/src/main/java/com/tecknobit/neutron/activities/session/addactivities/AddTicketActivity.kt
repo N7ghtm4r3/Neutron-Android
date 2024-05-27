@@ -34,9 +34,11 @@ import androidx.compose.ui.unit.dp
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutron.activities.session.ProjectRevenueActivity
+import com.tecknobit.neutron.ui.ErrorUI
 import com.tecknobit.neutron.ui.NeutronButton
 import com.tecknobit.neutron.ui.NeutronTextField
 import com.tecknobit.neutron.ui.getProjectRevenue
+import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue.IDENTIFIER_KEY
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 
@@ -48,13 +50,14 @@ class AddTicketActivity : AddRevenueActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            currentProjectRevenue = MainActivity.revenues.getProjectRevenue(
-                intent.getStringExtra(IDENTIFIER_KEY)!!
-            )
-            if(currentProjectRevenue != null)
-                AddRevenueUI()
-            else {
-                // TODO: MAKE THE ERROR UI
+            NeutronTheme {
+                currentProjectRevenue = MainActivity.revenues.getProjectRevenue(
+                    intent.getStringExtra(IDENTIFIER_KEY)!!
+                )
+                if(currentProjectRevenue != null)
+                    AddRevenueUI()
+                else
+                    ErrorUI()
             }
         }
     }

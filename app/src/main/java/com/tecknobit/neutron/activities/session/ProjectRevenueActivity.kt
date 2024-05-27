@@ -37,6 +37,7 @@ import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.revenues
 import com.tecknobit.neutron.activities.session.addactivities.AddTicketActivity
 import com.tecknobit.neutron.ui.EmptyListUI
+import com.tecknobit.neutron.ui.ErrorUI
 import com.tecknobit.neutron.ui.GeneralRevenue
 import com.tecknobit.neutron.ui.NeutronAlertDialog
 import com.tecknobit.neutron.ui.SwipeToDeleteContainer
@@ -136,13 +137,13 @@ class ProjectRevenueActivity : NeutronActivity() {
                             },
                             uiContent = {
                                 val tickets = projectRevenue.value.tickets.toMutableList()
-                                LazyColumn {
-                                    item {
-                                        GeneralRevenue(
-                                            revenue = projectRevenue.value.initialRevenue
-                                        )
-                                    }
-                                    if(tickets.isNotEmpty()) {
+                                if(tickets.isNotEmpty()) {
+                                    LazyColumn {
+                                        item {
+                                            GeneralRevenue(
+                                                revenue = projectRevenue.value.initialRevenue
+                                            )
+                                        }
                                         items(
                                             key = { ticket -> ticket.id },
                                             items = tickets
@@ -167,21 +168,21 @@ class ProjectRevenueActivity : NeutronActivity() {
                                             }
                                             HorizontalDivider()
                                         }
-                                    } else {
-                                        item {
-                                            EmptyListUI(
-                                                icon = Icons.AutoMirrored.Filled.StickyNote2,
-                                                subText = R.string.no_tickets_yet
-                                            )
-                                        }
                                     }
+                                } else {
+                                    GeneralRevenue(
+                                        revenue = projectRevenue.value.initialRevenue
+                                    )
+                                    EmptyListUI(
+                                        icon = Icons.AutoMirrored.Filled.StickyNote2,
+                                        subText = R.string.no_tickets_yet
+                                    )
                                 }
                             }
                         )
                     }
-                } else {
-                    // TODO: MAKE THE ERROR UI
-                }
+                } else
+                    ErrorUI()
             }
         }
     }

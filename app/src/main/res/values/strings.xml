@@ -83,4 +83,5 @@
     <string name="retry">Retry</string>
     <string name="no_revenues_yet">No revenues yet</string>
     <string name="no_tickets_yet">No tickets yet</string>
+    <string name="an_error_occurred">An error occurred</string>
 </resources>

@@ -31,6 +31,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material3.AlertDialog
@@ -628,6 +629,31 @@ fun EmptyListUI(
         Text(
             text = stringResource(subText),
             color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+fun ErrorUI() {
+    Column (
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            modifier = Modifier
+                .size(100.dp),
+            imageVector = Icons.Default.Error,
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(
+                color = errorContainerDark
+            )
+        )
+        Text(
+            text = stringResource(R.string.an_error_occurred),
+            color = errorContainerDark
         )
     }
 }
