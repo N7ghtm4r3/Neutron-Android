@@ -74,4 +74,13 @@
     <string name="waiting_for_the_request">Waiting for the request…</string>
     <string name="sign_in_executed_successfully">Sign in executed successfully!</string>
     <string name="sign_in_failed_message">Sign in failed…</string>
+    <string name="currency">Currency</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="execute">Execute</string>
+    <string name="transferring_data">Transferring data…</string>
+    <string name="transfer_executed_successfully">Transfer executed successfully!</string>
+    <string name="transfer_failed">Transfer failed...</string>
+    <string name="retry">Retry</string>
+    <string name="no_revenues_yet">No revenues yet</string>
+    <string name="no_tickets_yet">No tickets yet</string>
 </resources>

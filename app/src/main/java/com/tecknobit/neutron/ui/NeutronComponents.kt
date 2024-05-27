@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -68,6 +69,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.VisualTransformation
@@ -76,7 +78,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecknobit.neutron.R
-import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.ui.theme.errorContainerDark
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue
@@ -211,7 +213,7 @@ fun RevenueInfo(
                 text = stringResource(R.string.revenue)
             )
             Text(
-                text = "${revenue.value}${MainActivity.currency}",
+                text = "${revenue.value}${user.currency.symbol}",
                 fontFamily = displayFontFamily
             )
         }
@@ -603,3 +605,29 @@ fun NeutronButton(
     }
 }
 
+@Composable
+fun EmptyListUI(
+    icon: ImageVector,
+    subText: Int
+) {
+    Column (
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            modifier = Modifier
+                .size(100.dp),
+            imageVector = icon,
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(
+                color = MaterialTheme.colorScheme.primary
+            )
+        )
+        Text(
+            text = stringResource(subText),
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}

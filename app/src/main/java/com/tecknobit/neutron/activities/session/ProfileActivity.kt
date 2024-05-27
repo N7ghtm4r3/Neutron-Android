@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -50,6 +51,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -90,17 +92,17 @@ import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.ui.NeutronAlertDialog
-import com.tecknobit.neutron.ui.NeutronButton
 import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.ui.theme.errorLight
+import com.tecknobit.neutroncore.records.User
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
 import com.tecknobit.neutroncore.records.User.LANGUAGES_SUPPORTED
+import com.tecknobit.neutroncore.records.User.NeutronCurrency
 import com.tecknobit.neutroncore.records.User.UserStorage.Local
-import com.tecknobit.neutroncore.records.User.UserStorage.Online
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileOutputStream
@@ -159,7 +161,32 @@ class ProfileActivity : NeutronActivity() {
                     else -> isSystemInDarkTheme()
                 }
             ) {
-                Scaffold {
+                Scaffold (
+                    floatingActionButton = {
+                        val showDeleteAlert = remember { mutableStateOf(false) }
+                        FloatingActionButton(
+                            onClick = {
+                                showDeleteAlert.value = true
+                            },
+                            containerColor = errorLight
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Cancel,
+                                contentDescription = null
+                            )
+                        }
+                        NeutronAlertDialog(
+                            icon = Icons.Default.Cancel,
+                            show = showDeleteAlert,
+                            title = R.string.delete,
+                            text = R.string.delete_message,
+                            confirmAction = {
+                                // TODO: MAKE THE REQUEST THEN
+                                navToSplash()
+                            }
+                        )
+                    }
+                ) {
                     DisplayContent(
                         modifier = Modifier
                             .padding(
@@ -355,6 +382,17 @@ class ProfileActivity : NeutronActivity() {
                             ChangeLanguage(
                                 changeLanguage = changeLanguage
                             )
+                            val changeCurrency = remember { mutableStateOf(false) }
+                            val currency = remember { mutableStateOf(user.currency.isoName) }
+                            UserInfo(
+                                header = R.string.currency,
+                                info = currency.value,
+                                onClick = { changeCurrency.value = true }
+                            )
+                            ChangeCurrency(
+                                changeCurrency = changeCurrency,
+                                currencyValue = currency
+                            )
                             val changeTheme = remember { mutableStateOf(false) }
                             UserInfo(
                                 header = R.string.theme,
@@ -375,54 +413,23 @@ class ProfileActivity : NeutronActivity() {
                             ChangeStorage(
                                 changeStorage = showChangeStorage
                             )
-                            Column (
-                                modifier = Modifier
-                                    .padding(
-                                        top = 16.dp,
-                                        start = 32.dp,
-                                        end = 32.dp,
-                                        bottom = 16.dp
-                                    ),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                val showLogoutAlert = remember { mutableStateOf(false) }
-                                val showDeleteAlert = remember { mutableStateOf(false) }
-                                NeutronButton(
-                                    onClick = {
-                                        showLogoutAlert.value = true
-                                    },
-                                    text = R.string.logout
-                                )
-                                NeutronAlertDialog(
-                                    icon = Icons.AutoMirrored.Filled.ExitToApp,
-                                    show = showLogoutAlert,
-                                    title = R.string.logout,
-                                    text = R.string.logout_message,
-                                    confirmAction = {
-                                        // TODO: MAKE THE OPE TO LOGOUT THEN
-                                        navToSplash()
-                                    }
-                                )
-                                NeutronButton(
-                                    onClick = {
-                                        showDeleteAlert.value = true
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = errorLight
-                                    ),
-                                    text = R.string.delete
-                                )
-                                NeutronAlertDialog(
-                                    icon = Icons.Default.Cancel,
-                                    show = showDeleteAlert,
-                                    title = R.string.delete,
-                                    text = R.string.delete_message,
-                                    confirmAction = {
-                                        // TODO: MAKE THE REQUEST THEN
-                                        navToSplash()
-                                    }
-                                )
-                            }
+                            val showLogoutAlert = remember { mutableStateOf(false) }
+                            UserInfo(
+                                header = R.string.disconnect,
+                                info = stringResource(id = R.string.logout),
+                                buttonText = R.string.execute,
+                                onClick = { showLogoutAlert.value = true }
+                            )
+                            NeutronAlertDialog(
+                                icon = Icons.AutoMirrored.Filled.ExitToApp,
+                                show = showLogoutAlert,
+                                title = R.string.logout,
+                                text = R.string.logout_message,
+                                confirmAction = {
+                                    // TODO: MAKE THE OPE TO LOGOUT THEN
+                                    navToSplash()
+                                }
+                            )
                         }
                     }
                 }
@@ -433,15 +440,28 @@ class ProfileActivity : NeutronActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun HostLocalSignIn() {
-        var isListening by remember { mutableStateOf(true) }
+        val isListening = remember { mutableStateOf(true) }
+        // TODO: TO REMOVE GET FROM THE REAL REQUEST RESPONSE
+        val success = remember { mutableStateOf(Random().nextBoolean()) }
+        val storeDataIfSuccessful = {
+            if(success.value) {
+                user.storage = if(currentStorageIsLocal)
+                    User.UserStorage.Online
+                else
+                    Local
+                navToSplash()
+            }
+        }
         if(hostLocalSignIn.value) {
             ModalBottomSheet(
                 sheetState = rememberModalBottomSheetState(
-                    confirmValueChange = { !isListening }
+                    confirmValueChange = { !isListening.value }
                 ),
                 onDismissRequest = {
-                    if(!isListening)
+                    if(!isListening.value) {
+                        storeDataIfSuccessful.invoke()
                         hostLocalSignIn.value = false
+                    }
                 }
             ) {
                 // TODO: IMPLEMENT THE SOCKETMANAGER OR THE WRAPPER CLASS TO EXECUTE THE HOSTING AND THE DATA TRANSFER
@@ -451,9 +471,8 @@ class ProfileActivity : NeutronActivity() {
                     key1 = true
                 ) {
                     delay(3000L)
-                    isListening = false
+                    isListening.value = false
                 }
-
                 Column (
                     modifier = Modifier
                         .fillMaxWidth()
@@ -461,67 +480,33 @@ class ProfileActivity : NeutronActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    if(isListening) {
+                    if(isListening.value) {
                         Text(
                             text = stringResource(R.string.hosting_local_sign_in),
                             fontFamily = displayFontFamily,
                             fontSize = 20.sp
                         )
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .padding(
-                                    top = 20.dp
-                                )
-                                .size(75.dp)
-                        )
-                        Text(
-                            modifier = Modifier
-                                .padding(
-                                    top = 10.dp
-                                ),
-                            text = stringResource(R.string.waiting_for_the_request),
-                            fontSize = 14.sp
-                        )
-                    } else {
-                        // TODO: TO REMOVE GET FROM THE REAL REQUEST RESPONSE
-                        val success = Random().nextBoolean()
-                        Image(
-                            modifier = Modifier
-                                .size(125.dp),
-                            imageVector = if(success)
-                                Icons.Default.CheckCircle
-                            else
-                                Icons.Default.Cancel,
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(
-                                color = if(success)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.error
-                            )
-                        )
-                        Text(
-                            text = stringResource(
-                                if (success)
-                                    R.string.sign_in_executed_successfully
-                                else
-                                    R.string.sign_in_failed_message
-                            ),
-                            fontSize = 14.sp
-                        )
                     }
+                    ResponseStatusUI(
+                        isWaiting = isListening,
+                        statusText = R.string.waiting_for_the_request,
+                        isSuccessful = success,
+                        successText = R.string.sign_in_executed_successfully,
+                        failedText = R.string.sign_in_failed_message
+                    )
                     TextButton(
                         modifier = Modifier
                             .align(Alignment.End),
                         onClick = {
                             // TODO: CLOSE THE LISTENING THEN
                             hostLocalSignIn.value = false
-                            isListening = false
+                            isListening.value = false
+                            storeDataIfSuccessful.invoke()
                         }
                     ) {
                         Text(
                             text = stringResource(
-                                if(isListening)
+                                if(isListening.value)
                                     R.string.cancel
                                 else
                                     R.string.close
@@ -531,7 +516,7 @@ class ProfileActivity : NeutronActivity() {
                 }
             }
         } else
-            isListening = true
+            isListening.value = true
     }
 
     @Composable
@@ -633,6 +618,49 @@ class ProfileActivity : NeutronActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
+    private fun ChangeCurrency(
+        changeCurrency: MutableState<Boolean>,
+        currencyValue: MutableState<String>
+    ) {
+        ChangeInfo(
+            showModal = changeCurrency
+        ) {
+            NeutronCurrency.entries.forEach { currency ->
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            // TODO: MAKE THE REQUEST AND FETCH THE NEW CHANGE RATE THEN
+                            user.currency = currency
+                            currencyValue.value = currency.isoName
+                            changeCurrency.value = false
+                        }
+                        .padding(
+                            all = 16.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Flag,
+                        contentDescription = null,
+                        tint = if(user.currency == currency)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            LocalContentColor.current
+                    )
+                    Text(
+                        text = "${currency.isoName} ${currency.isoCode}",
+                        fontFamily = displayFontFamily
+                    )
+                }
+                HorizontalDivider()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
     private fun ChangeTheme(
         changeTheme: MutableState<Boolean>
     ) {
@@ -685,16 +713,28 @@ class ProfileActivity : NeutronActivity() {
         val hostAddress = remember { mutableStateOf("") }
         val serverSecret = remember { mutableStateOf("") }
         var isExecuting by remember { mutableStateOf(false) }
+        val waiting = remember { mutableStateOf(true) }
+        val success = remember { mutableStateOf(false) }
+        val executeRequest = {
+            isExecuting = true
+            waiting.value = true
+            success.value = false
+            // TODO: MAKE THE REQUEST THEN
+        }
         val resetLayout = {
+            isExecuting = false
             hostAddress.value = ""
             serverSecret.value = ""
             changeStorage.value = false
+            waiting.value = true
+            success.value = false
         }
         ChangeInfo(
             showModal = changeStorage,
             sheetState = rememberModalBottomSheetState(
-                confirmValueChange = { !isExecuting }
-            )
+                confirmValueChange = { !isExecuting || success.value }
+            ),
+            onDismissRequest = { resetLayout.invoke() }
         ) {
             Column (
                 modifier = Modifier
@@ -738,24 +778,22 @@ class ProfileActivity : NeutronActivity() {
                         )
                     }
                 } else {
-                    CircularProgressIndicator()
-                    // TODO: MAKE THE REQUEST THEN SET THE LOCAL SESSION
-
-                    // TODO: TO REMOVE AND USE
-                    LaunchedEffect(key1 = true) {
-                        delay(5000L)
-                        user.storage = if(currentStorageIsLocal)
-                            Online
-                        else
-                            Local
-                        navToSplash()
+                    // TODO: TO REMOVE
+                    LaunchedEffect(key1 = waiting.value){
+                        Log.d("gagagaga", "gagagag")
+                        delay(3000L)
+                        waiting.value = false
+                        // TODO: TO REMOVE GET FROM THE REAL REQUEST RESPONSE
+                        success.value = Random().nextBoolean()
+                        // TODO: IF success = true STORE DATA
                     }
-                    // TODO: THIS INSTEAD
-                    //  user.storage = if(currentStorageIsLocal)
-                    //       Online
-                    //  else
-                    //       Local
-                    //  navToSplash()
+                    ResponseStatusUI(
+                        isWaiting = waiting,
+                        statusText = R.string.transferring_data,
+                        isSuccessful = success,
+                        successText = R.string.transfer_executed_successfully,
+                        failedText = R.string.transfer_failed
+                    )
                 }
                 Row (
                     modifier = Modifier
@@ -763,34 +801,52 @@ class ProfileActivity : NeutronActivity() {
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(
-                        onClick = {
-                            if(isExecuting) {
-                                // TODO: STOP THE TRANSFER THEN
-                                isExecuting = false
-                            } else {
-                                resetLayout.invoke()
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(
-                                if(isExecuting)
-                                    R.string.cancel
-                                else
-                                    R.string.dismiss
-                            )
-                        )
-                    }
                     if(!isExecuting) {
                         TextButton(
-                            onClick = {
-                                // TODO: MAKE THE REQUEST THEN
-                                isExecuting = true
-                            }
+                            onClick = { resetLayout.invoke() }
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    if(isExecuting)
+                                        R.string.cancel
+                                    else
+                                        R.string.dismiss
+                                )
+                            )
+                        }
+                        TextButton(
+                            onClick = { executeRequest.invoke() }
                         ) {
                             Text(
                                 text = stringResource(R.string.confirm)
+                            )
+                        }
+                    } else {
+                        TextButton(
+                            onClick = {
+                                if(waiting.value) {
+                                    // TODO: STOP THE TRANSFER THEN
+                                    isExecuting = false
+                                } else {
+                                    if(success.value) {
+                                        resetLayout.invoke()
+                                        changeStorage.value = false
+                                    } else
+                                        executeRequest.invoke()
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    if(waiting.value)
+                                        R.string.cancel
+                                    else {
+                                        if(success.value)
+                                            R.string.close
+                                        else
+                                            R.string.retry
+                                    }
+                                )
                             )
                         }
                     }
@@ -859,6 +915,58 @@ class ProfileActivity : NeutronActivity() {
             returnCursor.close()
         }
         return file.path
+    }
+
+    @Composable
+    private fun ResponseStatusUI(
+        isWaiting: MutableState<Boolean>,
+        statusText: Int,
+        isSuccessful: MutableState<Boolean>,
+        successText: Int,
+        failedText: Int
+    ) {
+        if(isWaiting.value) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(
+                        top = 20.dp
+                    )
+                    .size(75.dp)
+            )
+            Text(
+                modifier = Modifier
+                    .padding(
+                        top = 10.dp
+                    ),
+                text = stringResource(statusText),
+                fontSize = 14.sp
+            )
+        } else {
+            Image(
+                modifier = Modifier
+                    .size(125.dp),
+                imageVector = if(isSuccessful.value)
+                    Icons.Default.CheckCircle
+                else
+                    Icons.Default.Cancel,
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
+                    color = if(isSuccessful.value)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.error
+                )
+            )
+            Text(
+                text = stringResource(
+                    if (isSuccessful.value)
+                        successText
+                    else
+                        failedText
+                ),
+                fontSize = 14.sp
+            )
+        }
     }
 
     private fun navBack() {

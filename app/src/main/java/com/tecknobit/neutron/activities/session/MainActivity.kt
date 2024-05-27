@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.SpeakerNotesOff
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -48,6 +49,7 @@ import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.PROJECT_LABEL
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.activities.session.addactivities.AddRevenuesActivity
+import com.tecknobit.neutron.ui.EmptyListUI
 import com.tecknobit.neutron.ui.GeneralRevenue
 import com.tecknobit.neutron.ui.LabelBadge
 import com.tecknobit.neutron.ui.RevenueInfo
@@ -69,9 +71,6 @@ class MainActivity : NeutronActivity() {
     companion object {
 
         val revenues = mutableStateListOf<Revenue>()
-
-        // TODO: USE THE REAL DATA
-        val currency = "€"
 
     }
 
@@ -225,7 +224,7 @@ class MainActivity : NeutronActivity() {
                                         verticalArrangement = Arrangement.spacedBy(5.dp)
                                     ) {
                                         Text(
-                                            text = "${revenues.getWalletBalance()}$currency",
+                                            text = "${revenues.getWalletBalance()}${user.currency.symbol}",
                                             fontFamily = bodyFontFamily,
                                             fontSize = 35.sp,
                                             color = Color.White
@@ -249,8 +248,12 @@ class MainActivity : NeutronActivity() {
                                             .size(70.dp)
                                             .clip(CircleShape)
                                             .clickable {
-                                                startActivity(Intent(this@MainActivity,
-                                                    ProfileActivity::class.java))
+                                                startActivity(
+                                                    Intent(
+                                                        this@MainActivity,
+                                                        ProfileActivity::class.java
+                                                    )
+                                                )
                                             }
                                             .border(
                                                 width = 1.dp,
@@ -311,7 +314,10 @@ class MainActivity : NeutronActivity() {
                                     }
                                 }
                             } else {
-                                // TODO: MAKE THE LIST EMPTY UI
+                                EmptyListUI(
+                                    icon = Icons.Default.SpeakerNotesOff,
+                                    subText = R.string.no_revenues_yet
+                                )
                             }
                         }
                     )

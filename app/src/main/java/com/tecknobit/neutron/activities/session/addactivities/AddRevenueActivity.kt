@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.sp
 import com.tecknobit.apimanager.annotations.Wrapper
 import com.tecknobit.apimanager.formatters.TimeFormatter
 import com.tecknobit.neutron.R
-import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.ui.NeutronButton
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
@@ -137,7 +137,7 @@ abstract class AddRevenueActivity: ComponentActivity() {
                                     start = 32.dp,
                                     end = 32.dp
                                 ),
-                            text = "${revenueValue.value}${MainActivity.currency}",
+                            text = "${revenueValue.value}${user.currency.symbol}",
                             color = Color.White,
                             fontFamily = displayFontFamily,
                             fontSize = 50.sp,

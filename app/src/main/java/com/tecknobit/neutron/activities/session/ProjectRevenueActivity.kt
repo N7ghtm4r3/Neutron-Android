@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,8 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.revenues
 import com.tecknobit.neutron.activities.session.addactivities.AddTicketActivity
+import com.tecknobit.neutron.ui.EmptyListUI
 import com.tecknobit.neutron.ui.GeneralRevenue
 import com.tecknobit.neutron.ui.NeutronAlertDialog
 import com.tecknobit.neutron.ui.SwipeToDeleteContainer
@@ -49,9 +52,6 @@ class ProjectRevenueActivity : NeutronActivity() {
     private lateinit var projectRevenue: MutableState<ProjectRevenue>
 
     private lateinit var showDeleteProject: MutableState<Boolean>
-
-    // TODO: USE THE REAL DATA
-    val currency = "€"
 
     @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -129,7 +129,7 @@ class ProjectRevenueActivity : NeutronActivity() {
                                     text = stringResource(
                                         R.string.total_revenues,
                                         projectRevenue.value.value,
-                                        currency
+                                        user.currency.symbol
                                     ),
                                     color = Color.White
                                 )
@@ -168,7 +168,12 @@ class ProjectRevenueActivity : NeutronActivity() {
                                             HorizontalDivider()
                                         }
                                     } else {
-                                        // TODO: MAKE THE UI EMPTY LIST
+                                        item {
+                                            EmptyListUI(
+                                                icon = Icons.AutoMirrored.Filled.StickyNote2,
+                                                subText = R.string.no_tickets_yet
+                                            )
+                                        }
                                     }
                                 }
                             }
