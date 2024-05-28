@@ -9,26 +9,16 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.SpeakerNotesOff
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -46,14 +36,9 @@ import coil.request.ImageRequest
 import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.PROJECT_LABEL
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.activities.session.addactivities.AddRevenuesActivity
-import com.tecknobit.neutron.ui.EmptyListUI
-import com.tecknobit.neutron.ui.GeneralRevenue
-import com.tecknobit.neutron.ui.LabelBadge
-import com.tecknobit.neutron.ui.RevenueInfo
-import com.tecknobit.neutron.ui.SwipeToDeleteContainer
+import com.tecknobit.neutron.ui.DisplayRevenues
 import com.tecknobit.neutron.ui.getWalletBalance
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.bodyFontFamily
@@ -273,52 +258,14 @@ class MainActivity : NeutronActivity() {
                             }
                         },
                         uiContent = {
-                            if(revenues.isNotEmpty()) {
-                                LazyColumn (
-                                    modifier = Modifier
-                                        .fillMaxHeight(),
-                                    contentPadding = PaddingValues(
-                                        bottom = 16.dp
-                                    )
-                                ) {
-                                    items(
-                                        items = revenues,
-                                        key = { it.id }
-                                    ) { revenue ->
-                                        if(revenue is GeneralRevenue) {
-                                            SwipeToDeleteContainer(
-                                                item = revenue,
-                                                onDelete = {
-                                                    // TODO: MAKE REQUEST THEN
-                                                    revenues.remove(revenue)
-                                                }
-                                            ) {
-                                                GeneralRevenue(
-                                                    revenue = revenue
-                                                )
-                                            }
-                                        } else {
-                                            SwipeToDeleteContainer(
-                                                item = revenue,
-                                                onDelete = {
-                                                    // TODO: MAKE REQUEST THEN
-                                                    revenues.remove(revenue)
-                                                }
-                                            ) {
-                                                ProjectRevenue(
-                                                    revenue = revenue as ProjectRevenue
-                                                )
-                                            }
-                                        }
-                                        HorizontalDivider()
-                                    }
+                            DisplayRevenues(
+                                revenues = revenues,
+                                navToProject = { revenue ->
+                                    val intent = Intent(this@MainActivity, ProjectRevenueActivity::class.java)
+                                    intent.putExtra(IDENTIFIER_KEY, revenue.id)
+                                    startActivity(intent)
                                 }
-                            } else {
-                                EmptyListUI(
-                                    icon = Icons.Default.SpeakerNotesOff,
-                                    subText = R.string.no_revenues_yet
-                                )
-                            }
+                            )
                         }
                     )
                 }
@@ -329,53 +276,6 @@ class MainActivity : NeutronActivity() {
                 finishAffinity()
             }
         })
-    }
-
-    @Composable
-    private fun ProjectRevenue(
-        revenue: ProjectRevenue
-    ) {
-        val navToProject = {
-            val intent = Intent(this@MainActivity, ProjectRevenueActivity::class.java)
-            intent.putExtra(IDENTIFIER_KEY, revenue.id)
-            startActivity(intent)
-        }
-        ListItem(
-            modifier = Modifier
-                .clickable {
-                    navToProject.invoke()
-                },
-            headlineContent = {
-                Text(
-                    text = revenue.title,
-                    fontSize = 20.sp
-                )
-            },
-            supportingContent = {
-                RevenueInfo(
-                    revenue = revenue
-                )
-            },
-            trailingContent = {
-                Column {
-                    LabelBadge(
-                        label = PROJECT_LABEL
-                    )
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.End),
-                        onClick = { navToProject.invoke() }
-                    ) {
-                        Icon(
-                            modifier = Modifier
-                                .size(40.dp),
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null
-                        )
-                    }
-                }
-            }
-        )
     }
 
 }

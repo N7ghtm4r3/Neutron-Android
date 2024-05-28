@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +36,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.RemoveCircleOutline
+import androidx.compose.material.icons.filled.SpeakerNotesOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -84,12 +87,67 @@ import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.ui.theme.errorContainerDark
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue
 import com.tecknobit.neutroncore.records.revenues.InitialRevenue
+import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.Revenue
 import com.tecknobit.neutroncore.records.revenues.RevenueLabel
 import com.tecknobit.neutroncore.records.revenues.TicketRevenue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+
+lateinit var PROJECT_LABEL: RevenueLabel
+
+@Composable
+fun DisplayRevenues(
+    revenues: SnapshotStateList<Revenue>,
+    navToProject: (Revenue) -> Unit
+) {
+    if(revenues.isNotEmpty()) {
+        val onDelete: (Revenue) -> Unit = { revenue ->
+            // TODO: MAKE REQUEST THEN
+            revenues.remove(revenue)
+        }
+        LazyColumn (
+            modifier = Modifier
+                .fillMaxHeight(),
+            contentPadding = PaddingValues(
+                bottom = 16.dp
+            )
+        ) {
+            items(
+                items = revenues,
+                key = { it.id }
+            ) { revenue ->
+                if(revenue is GeneralRevenue) {
+                    SwipeToDeleteContainer(
+                        item = revenue,
+                        onDelete = onDelete
+                    ) {
+                        GeneralRevenue(
+                            revenue = revenue
+                        )
+                    }
+                } else {
+                    SwipeToDeleteContainer(
+                        item = revenue,
+                        onDelete = onDelete
+                    ) {
+                        ProjectRevenue(
+                            revenue = revenue as ProjectRevenue,
+                            navToProject = navToProject
+                        )
+                    }
+                }
+                HorizontalDivider()
+            }
+        }
+    } else {
+        EmptyListUI(
+            icon = Icons.Default.SpeakerNotesOff,
+            subText = R.string.no_revenues_yet
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -199,6 +257,49 @@ fun GeneralRevenue(
     }
     if(isInitialRevenue)
         HorizontalDivider()
+}
+
+@Composable
+private fun ProjectRevenue(
+    revenue: ProjectRevenue,
+    navToProject: (Revenue) -> Unit
+) {
+    ListItem(
+        modifier = Modifier
+            .clickable {
+                navToProject.invoke(revenue)
+            },
+        headlineContent = {
+            Text(
+                text = revenue.title,
+                fontSize = 20.sp
+            )
+        },
+        supportingContent = {
+            RevenueInfo(
+                revenue = revenue
+            )
+        },
+        trailingContent = {
+            Column {
+                LabelBadge(
+                    label = PROJECT_LABEL
+                )
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.End),
+                    onClick = { navToProject.invoke(revenue) }
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp),
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable
