@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -96,13 +95,13 @@ import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.ui.theme.errorLight
-import com.tecknobit.neutroncore.records.User
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
 import com.tecknobit.neutroncore.records.User.LANGUAGES_SUPPORTED
 import com.tecknobit.neutroncore.records.User.NeutronCurrency
 import com.tecknobit.neutroncore.records.User.UserStorage.Local
+import com.tecknobit.neutroncore.records.User.UserStorage.Online
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileOutputStream
@@ -443,25 +442,14 @@ class ProfileActivity : NeutronActivity() {
         val isListening = remember { mutableStateOf(true) }
         // TODO: TO REMOVE GET FROM THE REAL REQUEST RESPONSE
         val success = remember { mutableStateOf(Random().nextBoolean()) }
-        val storeDataIfSuccessful = {
-            if(success.value) {
-                user.storage = if(currentStorageIsLocal)
-                    User.UserStorage.Online
-                else
-                    Local
-                navToSplash()
-            }
-        }
         if(hostLocalSignIn.value) {
             ModalBottomSheet(
                 sheetState = rememberModalBottomSheetState(
                     confirmValueChange = { !isListening.value }
                 ),
                 onDismissRequest = {
-                    if(!isListening.value) {
-                        storeDataIfSuccessful.invoke()
+                    if(!isListening.value)
                         hostLocalSignIn.value = false
-                    }
                 }
             ) {
                 // TODO: IMPLEMENT THE SOCKETMANAGER OR THE WRAPPER CLASS TO EXECUTE THE HOSTING AND THE DATA TRANSFER
@@ -501,7 +489,6 @@ class ProfileActivity : NeutronActivity() {
                             // TODO: CLOSE THE LISTENING THEN
                             hostLocalSignIn.value = false
                             isListening.value = false
-                            storeDataIfSuccessful.invoke()
                         }
                     ) {
                         Text(
@@ -780,7 +767,6 @@ class ProfileActivity : NeutronActivity() {
                 } else {
                     // TODO: TO REMOVE
                     LaunchedEffect(key1 = waiting.value){
-                        Log.d("gagagaga", "gagagag")
                         delay(3000L)
                         waiting.value = false
                         // TODO: TO REMOVE GET FROM THE REAL REQUEST RESPONSE
@@ -831,6 +817,11 @@ class ProfileActivity : NeutronActivity() {
                                     if(success.value) {
                                         resetLayout.invoke()
                                         changeStorage.value = false
+                                        user.storage = if(currentStorageIsLocal)
+                                            Online
+                                        else
+                                            Local
+                                        navToSplash()
                                     } else
                                         executeRequest.invoke()
                                 }
