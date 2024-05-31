@@ -342,7 +342,11 @@ class AddRevenuesActivity : AddRevenueActivity() {
     }
 
     override fun navBack() {
-        startActivity(Intent(this, MainActivity::class.java))
+        reviewInApp(
+            flowAction = {
+                startActivity(Intent(this, MainActivity::class.java))
+            }
+        )
     }
 
 }

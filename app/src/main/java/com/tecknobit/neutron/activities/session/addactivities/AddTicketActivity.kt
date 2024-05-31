@@ -185,10 +185,14 @@ class AddTicketActivity : AddRevenueActivity() {
     }
 
     override fun navBack() {
-        val intent = Intent(this, ProjectRevenueActivity::class.java)
-        if(currentProjectRevenue != null)
-            intent.putExtra(IDENTIFIER_KEY, currentProjectRevenue!!.id)
-        startActivity(intent)
+        reviewInApp(
+            flowAction = {
+                val intent = Intent(this, ProjectRevenueActivity::class.java)
+                if(currentProjectRevenue != null)
+                    intent.putExtra(IDENTIFIER_KEY, currentProjectRevenue!!.id)
+                startActivity(intent)
+            }
+        )
     }
 
 }

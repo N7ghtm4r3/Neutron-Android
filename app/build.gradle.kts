@@ -73,6 +73,10 @@ dependencies {
     implementation(libs.colorpicker.compose)
     implementation(libs.core)
     implementation(libs.zxing.android.embedded)
+    implementation(libs.review)
+    implementation(libs.review.ktx)
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
 }
 
 configurations.all {

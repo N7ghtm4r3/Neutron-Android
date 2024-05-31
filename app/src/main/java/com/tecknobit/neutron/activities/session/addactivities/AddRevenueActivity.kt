@@ -60,6 +60,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.play.core.review.ReviewManager
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.tecknobit.apimanager.annotations.Wrapper
 import com.tecknobit.apimanager.formatters.TimeFormatter
 import com.tecknobit.neutron.R
@@ -91,12 +93,15 @@ abstract class AddRevenueActivity: ComponentActivity() {
 
     protected lateinit var revenueDescription: MutableState<String>
 
+    private lateinit var reviewManager: ReviewManager
+
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     protected fun AddRevenueUI() {
         showKeyboard = remember { mutableStateOf(true) }
         revenueValue = remember { mutableStateOf("0") }
+        reviewManager = ReviewManagerFactory.create(LocalContext.current)
         NeutronTheme {
             Scaffold (
                 topBar = {
@@ -207,40 +212,38 @@ abstract class AddRevenueActivity: ComponentActivity() {
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            ActionButton(
+                            Column (
                                 modifier = Modifier
-                                    .padding(
-                                        start = 20.dp
-                                    ),
-                                action = {
-                                    if(digits.isNotEmpty()) {
-                                        if(revenueValue.value.last() == '.')
+                                    .weight(1f)
+                                    .fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                ActionButton(
+                                    action = {
+                                        if(digits.isNotEmpty()) {
+                                            if(revenueValue.value.last() == '.')
+                                                revenueValue.value = revenueValue.value.removeSuffix(".")
+                                            else {
+                                                val digit = digits.removeLast()
+                                                revenueValue.value = if(revenueValue.value.contains("."))
+                                                    revenueValue.value.removeSuffix(digit.toString())
+                                                else
+                                                    ((revenueValue.value.toInt() - digit) / 10).toString()
+                                            }
+                                        } else if(revenueValue.value.last() == '.')
                                             revenueValue.value = revenueValue.value.removeSuffix(".")
-                                        else {
-                                            val digit = digits.removeLast()
-                                            revenueValue.value = if(revenueValue.value.contains("."))
-                                                revenueValue.value.removeSuffix(digit.toString())
-                                            else
-                                                ((revenueValue.value.toInt() - digit) / 10).toString()
-                                        }
-                                    } else if(revenueValue.value.last() == '.')
-                                        revenueValue.value = revenueValue.value.removeSuffix(".")
-                                },
-                                icon = Icons.AutoMirrored.Filled.Backspace
-                            )
+                                    },
+                                    icon = Icons.AutoMirrored.Filled.Backspace
+                                )
+                            }
                             NumberKeyboardButton(
                                 modifier = Modifier
-                                    .padding(
-                                        start = 40.dp
-                                    )
                                     .weight(1f),
                                 number = 0
                             )
                             KeyboardButton(
                                 modifier = Modifier
-                                    .padding(
-                                        start = 15.dp
-                                    )
                                     .weight(1f),
                                 onClick = {
                                     if(!revenueValue.value.contains("."))
@@ -313,7 +316,7 @@ abstract class AddRevenueActivity: ComponentActivity() {
 
     @Composable
     protected fun ActionButton(
-        modifier: Modifier,
+        modifier: Modifier = Modifier,
         action: () -> Unit,
         icon: ImageVector
     ) {
@@ -499,5 +502,31 @@ abstract class AddRevenueActivity: ComponentActivity() {
     }
 
     protected abstract fun navBack()
+
+    /**
+     * Function to launch the review in-app API
+     *
+     * @param flowAction: the action to execute when the review in-app finished
+     */
+    protected fun reviewInApp(
+        flowAction: () -> Unit
+    ) {
+        val request = reviewManager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val flow = reviewManager.launchReviewFlow(this, task.result)
+                flow.addOnCompleteListener {
+                    flowAction.invoke()
+                }
+                flow.addOnCanceledListener {
+                    flowAction.invoke()
+                }
+            } else
+                flowAction.invoke()
+        }
+        request.addOnFailureListener {
+            flowAction.invoke()
+        }
+    }
 
 }

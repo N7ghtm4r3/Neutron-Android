@@ -1,5 +1,6 @@
 [versions]
 agp = "8.3.2"
+appUpdate = "2.1.0"
 coilCompose = "2.6.0"
 colorpickerCompose = "1.0.8"
 core = "3.5.1"
@@ -12,12 +13,16 @@ lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.9.0"
 composeBom = "2024.05.00"
 materialIconsExtendedAndroid = "1.6.7"
+review = "2.0.1"
+reviewKtx = "2.0.1"
 uiTextGoogleFonts = "1.6.7"
 zxingAndroidEmbedded = "4.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
+app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
+app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpickerCompose" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
@@ -35,6 +40,8 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+review = { module = "com.google.android.play:review", version.ref = "review" }
+review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "reviewKtx" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 
 [plugins]
