@@ -735,7 +735,9 @@ fun EmptyListUI(
 }
 
 @Composable
-fun ErrorUI() {
+fun ErrorUI(
+    retryAction: @Composable (() -> Unit)? = null
+) {
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -756,5 +758,15 @@ fun ErrorUI() {
             text = stringResource(R.string.an_error_occurred),
             color = errorContainerDark
         )
+        if(retryAction != null) {
+            var retryActionStart by remember { mutableStateOf(false) }
+            TextButton(
+                onClick = { retryActionStart = true }
+            ) {
+                Text(text = stringResource(id = R.string.retry))
+            }
+            if(retryActionStart)
+                retryAction.invoke()
+        }
     }
 }

@@ -4,19 +4,30 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.StrictMode
-import androidx.activity.ComponentActivity
+import android.provider.Settings.ACTION_BIOMETRIC_ENROLL
+import android.provider.Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
+import androidx.appcompat.app.AppCompatActivity
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.Coil
@@ -32,6 +43,10 @@ import com.google.android.play.core.ktx.isImmediateUpdateAllowed
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.session.ConnectActivity
 import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutron.helpers.BiometricPromptManager
+import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationNotSet
+import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationSuccess
+import com.tecknobit.neutron.ui.ErrorUI
 import com.tecknobit.neutron.ui.PROJECT_LABEL
 import com.tecknobit.neutron.ui.theme.AppTypography
 import com.tecknobit.neutron.ui.theme.NeutronTheme
@@ -49,7 +64,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 @SuppressLint("CustomSplashScreen")
-class Splashscreen : ComponentActivity(), ImageLoaderFactory {
+class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
 
     companion object {
 
@@ -69,6 +84,13 @@ class Splashscreen : ComponentActivity(), ImageLoaderFactory {
     private var launcher  = registerForActivityResult(StartIntentSenderForResult()) { result ->
         if (result.resultCode != RESULT_OK)
             launchApp(MainActivity::class.java)
+    }
+
+    /**
+     * **biometricPromptManager** the manager used to authenticate with the bio params
+     */
+    private val biometricPromptManager by lazy {
+        BiometricPromptManager(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,8 +134,7 @@ class Splashscreen : ComponentActivity(), ImageLoaderFactory {
                         )
                     }
                 }
-                // TODO: MAKE THE REAL NAVIGATION
-                checkForUpdates(ConnectActivity::class.java)
+                LaunchBiometricAuth()
             }
         }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -121,6 +142,54 @@ class Splashscreen : ComponentActivity(), ImageLoaderFactory {
                 finishAffinity()
             }
         })
+    }
+
+    /**
+     * Function to launch the biometric check with the [biometricPromptManager]
+     *
+     * No-any params required
+     */
+    @Composable
+    private fun LaunchBiometricAuth() {
+        val biometricResult by biometricPromptManager.promptResults.collectAsState(
+            initial = null
+        )
+        val enrollLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+            onResult = {}
+        )
+        LaunchedEffect(biometricResult) {
+            if(biometricResult is AuthenticationNotSet) {
+                val enrollIntent = Intent(ACTION_BIOMETRIC_ENROLL).apply {
+                    putExtra(
+                        EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                        BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+                    )
+                }
+                enrollLauncher.launch(enrollIntent)
+            }
+        }
+        if(biometricResult == null) {
+            biometricPromptManager.showBiometricPrompt(
+                title = stringResource(R.string.login_required),
+                description = stringResource(R.string.enter_your_credentials_to_continue)
+            )
+        }
+        biometricResult?.let { result ->
+            when(result) {
+                AuthenticationSuccess -> {
+                    // TODO: MAKE THE REAL NAVIGATION
+                    checkForUpdates(ConnectActivity::class.java)
+                }
+                else -> {
+                    NeutronTheme {
+                        ErrorUI(
+                            retryAction = { LaunchBiometricAuth() }
+                        )
+                    }
+                }
+            }
+        }
     }
 
     /**

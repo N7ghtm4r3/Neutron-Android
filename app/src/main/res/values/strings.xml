@@ -84,4 +84,6 @@
     <string name="no_revenues_yet">No revenues yet</string>
     <string name="no_tickets_yet">No tickets yet</string>
     <string name="an_error_occurred">An error occurred</string>
+    <string name="login_required">Login required</string>
+    <string name="enter_your_credentials_to_continue">Enter your credentials to continue</string>
 </resources>

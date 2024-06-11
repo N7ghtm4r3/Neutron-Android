@@ -1,6 +1,7 @@
 [versions]
 agp = "8.3.2"
 appUpdate = "2.1.0"
+biometric = "1.1.0"
 coilCompose = "2.6.0"
 colorpickerCompose = "1.0.8"
 core = "3.5.1"
@@ -17,8 +18,10 @@ review = "2.0.1"
 reviewKtx = "2.0.1"
 uiTextGoogleFonts = "1.6.7"
 zxingAndroidEmbedded = "4.3.0"
+appcompat = "1.7.0"
 
 [libraries]
+androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
 app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
@@ -43,6 +46,7 @@ androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text
 review = { module = "com.google.android.play:review", version.ref = "review" }
 review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "reviewKtx" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -63,6 +63,7 @@ dependencies {
     implementation("com.tecknobit.neutroncore:Neutron-core:1.0.0")
     implementation(libs.coil.compose)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -77,6 +78,7 @@ dependencies {
     implementation(libs.review.ktx)
     implementation(libs.app.update)
     implementation(libs.app.update.ktx)
+    implementation(libs.androidx.biometric)
 }
 
 configurations.all {
