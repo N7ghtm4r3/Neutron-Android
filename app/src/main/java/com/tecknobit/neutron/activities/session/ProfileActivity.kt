@@ -95,10 +95,10 @@ import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.ui.theme.errorLight
+import com.tecknobit.neutroncore.helpers.InputValidator.LANGUAGES_SUPPORTED
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
-import com.tecknobit.neutroncore.records.User.LANGUAGES_SUPPORTED
 import com.tecknobit.neutroncore.records.User.NeutronCurrency
 import com.tecknobit.neutroncore.records.User.UserStorage.Local
 import com.tecknobit.neutroncore.records.User.UserStorage.Online
