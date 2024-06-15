@@ -153,7 +153,6 @@ class ProjectRevenueActivity : NeutronActivity() {
                                                 onRight = if(!ticket.isClosed) {
                                                     {
                                                         // TODO: MAKE REQUEST THEN
-                                                        ticket.isClosed = true
                                                     }
                                                 } else
                                                     null,

@@ -131,7 +131,7 @@ abstract class AddRevenueActivity: ComponentActivity() {
                     Row (
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(350.dp)
+                            .height(300.dp)
                             .background(MaterialTheme.colorScheme.primary),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
@@ -154,7 +154,7 @@ abstract class AddRevenueActivity: ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
-                                top = 250.dp
+                                top = 200.dp
                             ),
                         shape = RoundedCornerShape(
                             topStart = 50.dp,

@@ -93,6 +93,7 @@ import com.tecknobit.neutroncore.records.revenues.RevenueLabel
 import com.tecknobit.neutroncore.records.revenues.TicketRevenue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 lateinit var PROJECT_LABEL: RevenueLabel
@@ -184,7 +185,12 @@ fun GeneralRevenue(
                         ) {
                             items(
                                 items = (revenue as GeneralRevenue).labels,
-                                key = { it.id }
+                                key = {
+                                    if (it.id != null)
+                                        it.id
+                                    else
+                                        UUID.randomUUID()
+                                }
                             ) { label ->
                                 val badge = @Composable {
                                     LabelBadge(

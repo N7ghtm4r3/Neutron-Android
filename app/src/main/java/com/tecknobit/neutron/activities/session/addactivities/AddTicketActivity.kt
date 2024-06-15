@@ -112,10 +112,10 @@ class AddTicketActivity : AddRevenueActivity() {
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(
-                        top = 25.dp,
+                        top = 20.dp,
                         start = 32.dp,
                         end = 32.dp,
-                        bottom = 25.dp,
+                        bottom = 20.dp,
                     )
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
