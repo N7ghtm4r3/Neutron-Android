@@ -1,4 +1,4 @@
-package com.tecknobit.neutron.activities.session
+package com.tecknobit.neutron.activities.auth
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -35,6 +35,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,6 +75,7 @@ import com.tecknobit.neutron.ui.NeutronButton
 import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutron.viewmodels.ConnectActivityViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -88,6 +91,15 @@ class ConnectActivity : ComponentActivity() {
 
     private var localDatabaseNotExists: Boolean = true
 
+    private val snackbarHostState by lazy {
+        SnackbarHostState()
+    }
+
+    private val connectActivityViewModel = ConnectActivityViewModel(
+        context = this,
+        snackbarHostState = snackbarHostState
+    )
+
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,6 +110,7 @@ class ConnectActivity : ComponentActivity() {
             localDatabaseNotExists = Random().nextBoolean() // TODO: TO INIT CORRECTLY FETCHING THE DATABASE
             NeutronTheme {
                 Scaffold (
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                     floatingActionButton = {
                         AnimatedVisibility(
                             visible = !isSignUp.value && !storeDataOnline.value && localDatabaseNotExists
@@ -206,6 +219,12 @@ class ConnectActivity : ComponentActivity() {
 
     @Composable
     private fun FormSection() {
+        val host = remember { mutableStateOf("") }
+        val serverSecret = remember { mutableStateOf("") }
+        val name = remember { mutableStateOf("") }
+        val surname = remember { mutableStateOf("") }
+        val email = remember { mutableStateOf("") }
+        val password = remember { mutableStateOf("") }
         Column (
             modifier = Modifier
                 .fillMaxSize(),
@@ -237,10 +256,6 @@ class ConnectActivity : ComponentActivity() {
                 val keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 )
-                val host = remember { mutableStateOf("") }
-                val serverSecret = remember { mutableStateOf("") }
-                val name = remember { mutableStateOf("") }
-                val surname = remember { mutableStateOf("") }
                 AnimatedVisibility(
                     visible = storeDataOnline.value
                 ) {
@@ -282,7 +297,6 @@ class ConnectActivity : ComponentActivity() {
                         )
                     }
                 }
-                val email = remember { mutableStateOf("") }
                 AnimatedVisibility(
                     visible = !isSignUp.value && !storeDataOnline.value && localDatabaseNotExists
                 ) {
@@ -299,7 +313,6 @@ class ConnectActivity : ComponentActivity() {
                     label = R.string.email,
                     keyboardOptions = keyboardOptions
                 )
-                val password = remember { mutableStateOf("") }
                 var hiddenPassword by remember { mutableStateOf(true) }
                 NeutronOutlinedTextField(
                     value = password,
@@ -332,8 +345,22 @@ class ConnectActivity : ComponentActivity() {
                         )
                         .width(300.dp),
                     onClick = {
-                        // TODO: MAKE THE REQUEST THEN
-                        startActivity(Intent(this@ConnectActivity, MainActivity::class.java))
+                        if (isSignUp.value) {
+                            connectActivityViewModel.signUp(
+                                hostAddress = host.value,
+                                serverSecret = serverSecret.value,
+                                name = name.value,
+                                surname = surname.value,
+                                email = email.value,
+                                password = password.value
+                            )
+                        } else {
+                            connectActivityViewModel.signIn(
+                                hostAddress = host.value,
+                                email = email.value,
+                                password = password.value,
+                            )
+                        }
                     },
                     text = if(isSignUp.value)
                         R.string.sign_up_btn

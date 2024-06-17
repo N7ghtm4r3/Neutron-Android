@@ -41,7 +41,7 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.google.android.play.core.ktx.isImmediateUpdateAllowed
 import com.tecknobit.neutron.R
-import com.tecknobit.neutron.activities.session.ConnectActivity
+import com.tecknobit.neutron.activities.auth.ConnectActivity
 import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutron.helpers.BiometricPromptManager
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationNotSet

@@ -20,7 +20,7 @@
             tools:ignore="DiscouragedApi,LockedOrientationActivity"
             tools:replace="screenOrientation" />
         <activity
-            android:name=".activities.session.ConnectActivity"
+            android:name=".activities.auth.ConnectActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Neutron"

@@ -1,10 +1,12 @@
 [versions]
 agp = "8.3.2"
+apimanager = "2.2.3"
 appUpdate = "2.1.0"
 biometric = "1.1.0"
 coilCompose = "2.6.0"
 colorpickerCompose = "1.0.8"
 core = "3.5.1"
+equinox = "1.0.0"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -24,11 +26,13 @@ appcompat = "1.7.0"
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
+apimanager = { module = "com.github.N7ghtm4r3:APIManager", version.ref = "apimanager" }
 app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
 app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpickerCompose" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
+equinox = { module = "com.github.N7ghtm4r3:Equinox", version.ref = "equinox" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
