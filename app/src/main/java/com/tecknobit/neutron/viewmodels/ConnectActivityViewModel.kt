@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.text.intl.Locale.Companion.current
+import com.tecknobit.apimanager.formatters.JsonHelper
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutroncore.helpers.Endpoints.BASE_ENDPOINT
 import com.tecknobit.neutroncore.helpers.InputValidator.DEFAULT_LANGUAGE
@@ -66,10 +68,12 @@ class ConnectActivityViewModel(
                 requester.changeHost(host.value + BASE_ENDPOINT)
                 requester.sendRequest(
                     request = {
-                        var language =
-                            LANGUAGES_SUPPORTED[current.toLanguageTag().substringBefore("-")]
-                        if (language == null)
-                            language = DEFAULT_LANGUAGE
+                        val currentLanguageTag = current.toLanguageTag().substringBefore("-")
+                        var language = LANGUAGES_SUPPORTED[currentLanguageTag]
+                        language = if (language == null)
+                            DEFAULT_LANGUAGE
+                        else
+                            currentLanguageTag
                         requester.signUp(
                             serverSecret = serverSecret.value,
                             name = name.value,
@@ -79,10 +83,7 @@ class ConnectActivityViewModel(
                             language = language
                         )
                     },
-                    onSuccess = {
-                        // TODO: STORE IN LOCAL THE DATA THEN
-                        context.startActivity(Intent(context, MainActivity::class.java))
-                    },
+                    onSuccess = { response -> launchApp(response) },
                     onFailure = { showSnack(it) }
                 )
             } else {
@@ -141,10 +142,7 @@ class ConnectActivityViewModel(
                             password = password.value
                         )
                     },
-                    onSuccess = {
-                        // TODO: STORE IN LOCAL THE DATA THEN
-                        context.startActivity(Intent(context, MainActivity::class.java))
-                    },
+                    onSuccess = { response -> launchApp(response) },
                     onFailure = { showSnack(it) }
                 )
             } else {
@@ -173,6 +171,16 @@ class ConnectActivityViewModel(
             return false
         }
         return true
+    }
+
+    private fun launchApp(
+        response: JsonHelper
+    ) {
+        localUser.insertNewUser(
+            host.value,
+            response
+        )
+        context.startActivity(Intent(context, MainActivity::class.java))
     }
 
 }

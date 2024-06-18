@@ -36,6 +36,7 @@ import coil.request.ImageRequest
 import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.activities.session.addactivities.AddRevenuesActivity
 import com.tecknobit.neutron.ui.DisplayRevenues
@@ -250,7 +251,7 @@ class MainActivity : NeutronActivity() {
                                             ),
                                         contentScale = ContentScale.Crop,
                                         model = ImageRequest.Builder(this@MainActivity)
-                                            .data(user.profilePic)
+                                            .data(localUser.profilePic)
                                             .crossfade(true)
                                             .crossfade(500)
                                             .build(),

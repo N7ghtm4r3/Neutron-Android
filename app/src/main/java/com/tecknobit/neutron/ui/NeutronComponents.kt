@@ -661,7 +661,7 @@ fun NeutronOutlinedTextField(
     errorText: Int? = null,
     onValueChange: (String) -> Unit = {
         if (validator != null)
-            isError.value = it.isNotEmpty() && !validator.invoke()
+            isError.value = value.value.isNotEmpty() && !validator.invoke()
         value.value = it
     },
     label: Int,

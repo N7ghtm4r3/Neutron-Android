@@ -15,11 +15,10 @@ open class NeutronViewModel(
     protected val snackbarHostState: SnackbarHostState
 ) : ViewModel(), FetcherManagerWrapper {
 
-    protected val requester by lazy {
-        // TODO: INIT PROPERLY THE HOST VALUE
-        NeutronRequester(
-            host = ""
-        )
+    companion object {
+
+        lateinit var requester: NeutronRequester
+
     }
 
     protected val refreshRoutine = CoroutineScope(Dispatchers.Default)

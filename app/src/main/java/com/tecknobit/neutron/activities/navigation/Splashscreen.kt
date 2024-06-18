@@ -43,6 +43,7 @@ import com.google.android.play.core.ktx.isImmediateUpdateAllowed
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.auth.ConnectActivity
 import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutron.helpers.AndroidLocalUser
 import com.tecknobit.neutron.helpers.BiometricPromptManager
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationNotSet
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationSuccess
@@ -51,6 +52,8 @@ import com.tecknobit.neutron.ui.PROJECT_LABEL
 import com.tecknobit.neutron.ui.theme.AppTypography
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutron.viewmodels.NeutronViewModel.Companion.requester
+import com.tecknobit.neutroncore.helpers.NeutronRequester
 import com.tecknobit.neutroncore.records.User
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.RevenueLabel
@@ -70,6 +73,8 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
 
         // TODO: TO INIT CORRECTLY
         val user = User()
+
+        lateinit var localUser: AndroidLocalUser
 
     }
 
@@ -95,6 +100,7 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        localUser = AndroidLocalUser(this)
         setContent {
             val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
             StrictMode.setThreadPolicy(policy)
@@ -178,8 +184,16 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
         biometricResult?.let { result ->
             when(result) {
                 AuthenticationSuccess -> {
-                    // TODO: MAKE THE REAL NAVIGATION
-                    checkForUpdates(ConnectActivity::class.java)
+                    val firstScreen = if (localUser.isAuthenticated)
+                        MainActivity::class.java
+                    else
+                        ConnectActivity::class.java
+                    requester = NeutronRequester(
+                        host = localUser.hostAddress,
+                        userId = localUser.userId,
+                        userToken = localUser.userToken
+                    )
+                    checkForUpdates(firstScreen)
                 }
                 else -> {
                     NeutronTheme {
