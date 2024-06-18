@@ -41,7 +41,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +75,12 @@ import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.viewmodels.ConnectActivityViewModel
+import com.tecknobit.neutroncore.helpers.InputValidator.isEmailValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isHostValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isNameValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isServerSecretValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isSurnameValid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -83,19 +88,13 @@ import java.util.Random
 
 class ConnectActivity : ComponentActivity() {
 
-    private lateinit var isSignUp: MutableState<Boolean>
-
-    private lateinit var storeDataOnline: MutableState<Boolean>
-
-    private lateinit var showQrCodeLogin: MutableState<Boolean>
-
     private var localDatabaseNotExists: Boolean = true
 
     private val snackbarHostState by lazy {
         SnackbarHostState()
     }
 
-    private val connectActivityViewModel = ConnectActivityViewModel(
+    private val viewModel = ConnectActivityViewModel(
         context = this,
         snackbarHostState = snackbarHostState
     )
@@ -104,19 +103,32 @@ class ConnectActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            isSignUp = remember { mutableStateOf(true) }
-            storeDataOnline = remember { mutableStateOf(false) }
-            showQrCodeLogin = remember { mutableStateOf(false) }
+            viewModel.isSignUp = remember { mutableStateOf(true) }
+            viewModel.storeDataOnline = remember { mutableStateOf(false) }
+            viewModel.showQrCodeLogin = remember { mutableStateOf(false) }
             localDatabaseNotExists = Random().nextBoolean() // TODO: TO INIT CORRECTLY FETCHING THE DATABASE
+            viewModel.host = remember { mutableStateOf("") }
+            viewModel.hostError = remember { mutableStateOf(false) }
+            viewModel.serverSecret = remember { mutableStateOf("") }
+            viewModel.serverSecretError = remember { mutableStateOf(false) }
+            viewModel.name = remember { mutableStateOf("") }
+            viewModel.nameError = remember { mutableStateOf(false) }
+            viewModel.surname = remember { mutableStateOf("") }
+            viewModel.surnameError = remember { mutableStateOf(false) }
+            viewModel.email = remember { mutableStateOf("") }
+            viewModel.emailError = remember { mutableStateOf(false) }
+            viewModel.password = remember { mutableStateOf("") }
+            viewModel.passwordError = remember { mutableStateOf(false) }
             NeutronTheme {
                 Scaffold (
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                     floatingActionButton = {
                         AnimatedVisibility(
-                            visible = !isSignUp.value && !storeDataOnline.value && localDatabaseNotExists
+                            visible = !viewModel.isSignUp.value && !viewModel.storeDataOnline.value
+                                    && localDatabaseNotExists
                         ) {
                             FloatingActionButton(
-                                onClick = { showQrCodeLogin.value = true }
+                                onClick = { viewModel.showQrCodeLogin.value = true }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.QrCode2,
@@ -162,7 +174,7 @@ class ConnectActivity : ComponentActivity() {
                 Column {
                     Text(
                         text = stringResource(
-                            if(isSignUp.value)
+                            if (viewModel.isSignUp.value)
                                 R.string.hello
                             else
                                 R.string.welcome_back
@@ -172,7 +184,7 @@ class ConnectActivity : ComponentActivity() {
                     )
                     Text(
                         text = stringResource(
-                            if(isSignUp.value)
+                            if (viewModel.isSignUp.value)
                                 R.string.sign_up
                             else
                                 R.string.sign_in
@@ -219,12 +231,6 @@ class ConnectActivity : ComponentActivity() {
 
     @Composable
     private fun FormSection() {
-        val host = remember { mutableStateOf("") }
-        val serverSecret = remember { mutableStateOf("") }
-        val name = remember { mutableStateOf("") }
-        val surname = remember { mutableStateOf("") }
-        val email = remember { mutableStateOf("") }
-        val password = remember { mutableStateOf("") }
         Column (
             modifier = Modifier
                 .fillMaxSize(),
@@ -241,12 +247,12 @@ class ConnectActivity : ComponentActivity() {
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Switch(
-                        checked = storeDataOnline.value,
-                        onCheckedChange = { storeDataOnline.value = it }
+                        checked = viewModel.storeDataOnline.value,
+                        onCheckedChange = { viewModel.storeDataOnline.value = it }
                     )
                     Text(
                         text = stringResource(
-                            if(isSignUp.value)
+                            if (viewModel.isSignUp.value)
                                 R.string.store_data_online
                             else
                                 R.string.stored_data_online
@@ -257,48 +263,60 @@ class ConnectActivity : ComponentActivity() {
                     imeAction = ImeAction.Next
                 )
                 AnimatedVisibility(
-                    visible = storeDataOnline.value
+                    visible = viewModel.storeDataOnline.value
                 ) {
                     Column (
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         NeutronOutlinedTextField(
-                            value = host,
+                            value = viewModel.host,
                             label = R.string.host_address,
-                            keyboardOptions = keyboardOptions
+                            keyboardOptions = keyboardOptions,
+                            errorText = R.string.host_address_not_valid,
+                            isError = viewModel.hostError,
+                            validator = { isHostValid(viewModel.host.value) }
                         )
                         AnimatedVisibility(
-                            visible = isSignUp.value
+                            visible = viewModel.isSignUp.value
                         ) {
                             NeutronOutlinedTextField(
-                                value = serverSecret,
+                                value = viewModel.serverSecret,
                                 label = R.string.server_secret,
-                                keyboardOptions = keyboardOptions
+                                keyboardOptions = keyboardOptions,
+                                errorText = R.string.server_secret_not_valid,
+                                isError = viewModel.serverSecretError,
+                                validator = { isServerSecretValid(viewModel.serverSecret.value) }
                             )
                         }
                     }
                 }
                 AnimatedVisibility(
-                    visible = isSignUp.value
+                    visible = viewModel.isSignUp.value
                 ) {
                     Column (
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         NeutronOutlinedTextField(
-                            value = name,
+                            value = viewModel.name,
                             label = R.string.name,
-                            keyboardOptions = keyboardOptions
-
+                            keyboardOptions = keyboardOptions,
+                            errorText = R.string.name_not_valid,
+                            isError = viewModel.nameError,
+                            validator = { isNameValid(viewModel.name.value) }
                         )
                         NeutronOutlinedTextField(
-                            value = surname,
+                            value = viewModel.surname,
                             label = R.string.surname,
-                            keyboardOptions = keyboardOptions
+                            keyboardOptions = keyboardOptions,
+                            errorText = R.string.surname_not_valid,
+                            isError = viewModel.surnameError,
+                            validator = { isSurnameValid(viewModel.surname.value) }
                         )
                     }
                 }
                 AnimatedVisibility(
-                    visible = !isSignUp.value && !storeDataOnline.value && localDatabaseNotExists
+                    visible = !viewModel.isSignUp.value && !viewModel.storeDataOnline.value
+                            && localDatabaseNotExists
                 ) {
                     Text(
                         modifier = Modifier
@@ -309,13 +327,16 @@ class ConnectActivity : ComponentActivity() {
                     )
                 }
                 NeutronOutlinedTextField(
-                    value = email,
+                    value = viewModel.email,
                     label = R.string.email,
-                    keyboardOptions = keyboardOptions
+                    keyboardOptions = keyboardOptions,
+                    errorText = R.string.email_not_valid,
+                    isError = viewModel.emailError,
+                    validator = { isEmailValid(viewModel.email.value) }
                 )
                 var hiddenPassword by remember { mutableStateOf(true) }
                 NeutronOutlinedTextField(
-                    value = password,
+                    value = viewModel.password,
                     label = R.string.password,
                     trailingIcon = {
                         IconButton(
@@ -336,7 +357,10 @@ class ConnectActivity : ComponentActivity() {
                         VisualTransformation.None,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password
-                    )
+                    ),
+                    errorText = R.string.password_not_valid,
+                    isError = viewModel.passwordError,
+                    validator = { isPasswordValid(viewModel.password.value) }
                 )
                 NeutronButton(
                     modifier = Modifier
@@ -344,25 +368,8 @@ class ConnectActivity : ComponentActivity() {
                             top = 10.dp
                         )
                         .width(300.dp),
-                    onClick = {
-                        if (isSignUp.value) {
-                            connectActivityViewModel.signUp(
-                                hostAddress = host.value,
-                                serverSecret = serverSecret.value,
-                                name = name.value,
-                                surname = surname.value,
-                                email = email.value,
-                                password = password.value
-                            )
-                        } else {
-                            connectActivityViewModel.signIn(
-                                hostAddress = host.value,
-                                email = email.value,
-                                password = password.value,
-                            )
-                        }
-                    },
-                    text = if(isSignUp.value)
+                    onClick = { viewModel.auth() },
+                    text = if (viewModel.isSignUp.value)
                         R.string.sign_up_btn
                     else
                         R.string.sign_in_btn
@@ -372,7 +379,7 @@ class ConnectActivity : ComponentActivity() {
                 ) {
                     Text(
                         text = stringResource(
-                            if(isSignUp.value)
+                            if (viewModel.isSignUp.value)
                                 R.string.have_an_account
                             else
                                 R.string.are_you_new_to_neutron
@@ -381,9 +388,9 @@ class ConnectActivity : ComponentActivity() {
                     )
                     Text(
                         modifier = Modifier
-                            .clickable { isSignUp.value = !isSignUp.value },
+                            .clickable { viewModel.isSignUp.value = !viewModel.isSignUp.value },
                         text = stringResource(
-                            if(isSignUp.value)
+                            if (viewModel.isSignUp.value)
                                 R.string.sign_in_btn
                             else
                                 R.string.sign_up_btn
@@ -399,9 +406,9 @@ class ConnectActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun LoginQrCode() {
-        if(showQrCodeLogin.value) {
+        if (viewModel.showQrCodeLogin.value) {
             ModalBottomSheet(
-                onDismissRequest = { showQrCodeLogin.value = false }
+                onDismissRequest = { viewModel.showQrCodeLogin.value = false }
             ) {
                 Column (
                     modifier = Modifier

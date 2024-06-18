@@ -656,7 +656,14 @@ fun NeutronOutlinedTextField(
     width: Dp = 300.dp,
     value: MutableState<String>,
     isTextArea: Boolean = false,
-    onValueChange: (String) -> Unit = { value.value = it },
+    validator: (() -> Boolean)? = null,
+    isError: MutableState<Boolean> = remember { mutableStateOf(false) },
+    errorText: Int? = null,
+    onValueChange: (String) -> Unit = {
+        if (validator != null)
+            isError.value = it.isNotEmpty() && !validator.invoke()
+        value.value = it
+    },
     label: Int,
     trailingIcon:  @Composable (() -> Unit)? = {
         IconButton(
@@ -685,7 +692,16 @@ fun NeutronOutlinedTextField(
         singleLine = !isTextArea,
         maxLines = 25,
         visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions
+        keyboardOptions = keyboardOptions,
+        isError = isError.value,
+        supportingText = if (isError.value && errorText != null) {
+            {
+                Text(
+                    text = stringResource(id = errorText)
+                )
+            }
+        } else
+            null
     )
 }
 

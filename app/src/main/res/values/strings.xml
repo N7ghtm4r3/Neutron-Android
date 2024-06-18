@@ -86,4 +86,10 @@
     <string name="an_error_occurred">An error occurred</string>
     <string name="login_required">Login required</string>
     <string name="enter_your_credentials_to_continue">Enter your credentials to continue</string>
+    <string name="host_address_not_valid">Host address not valid</string>
+    <string name="server_secret_not_valid">Server secret not valid</string>
+    <string name="name_not_valid">Name not valid</string>
+    <string name="surname_not_valid">Surname not valid</string>
+    <string name="email_not_valid">Email not valid</string>
+    <string name="password_not_valid">Password not valid</string>
 </resources>
