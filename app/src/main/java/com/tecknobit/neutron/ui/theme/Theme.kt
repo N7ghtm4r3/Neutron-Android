@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
 
@@ -257,14 +257,11 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun NeutronTheme(
-    darkTheme: Boolean = if(user != null) {
-        when(user.theme) {
-            Light -> false
-            Dark -> true
-            else -> isSystemInDarkTheme()
-        }
-    } else
-        isSystemInDarkTheme(),
+    darkTheme: Boolean = when (localUser.theme) {
+        Light -> false
+        Dark -> true
+        else -> isSystemInDarkTheme()
+    },
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

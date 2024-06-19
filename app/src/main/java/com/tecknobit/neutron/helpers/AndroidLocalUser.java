@@ -24,4 +24,10 @@ public class AndroidLocalUser extends LocalUser {
         return preferences.getString(key, null);
     }
 
+    @Override
+    public void clear() {
+        preferences.edit().clear().apply();
+        initLocalUser();
+    }
+
 }

@@ -82,7 +82,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecknobit.neutron.R
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.ui.theme.errorContainerDark
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue
@@ -321,7 +321,7 @@ fun RevenueInfo(
                 text = stringResource(R.string.revenue)
             )
             Text(
-                text = "${revenue.value}${user.currency.symbol}",
+                text = "${revenue.value}${localUser.currency.symbol}",
                 fontFamily = displayFontFamily
             )
         }

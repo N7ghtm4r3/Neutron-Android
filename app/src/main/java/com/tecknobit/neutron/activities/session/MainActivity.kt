@@ -37,7 +37,6 @@ import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.activities.session.addactivities.AddRevenuesActivity
 import com.tecknobit.neutron.ui.DisplayRevenues
 import com.tecknobit.neutron.ui.getWalletBalance
@@ -213,7 +212,7 @@ class MainActivity : NeutronActivity() {
                                         verticalArrangement = Arrangement.spacedBy(5.dp)
                                     ) {
                                         Text(
-                                            text = "${revenues.getWalletBalance()}${user.currency.symbol}",
+                                            text = "${revenues.getWalletBalance()}${localUser.currency.symbol}",
                                             fontFamily = bodyFontFamily,
                                             fontSize = 35.sp,
                                             color = Color.White

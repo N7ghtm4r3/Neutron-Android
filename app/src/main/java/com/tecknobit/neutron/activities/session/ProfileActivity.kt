@@ -59,6 +59,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -89,13 +91,17 @@ import com.journeyapps.barcodescanner.ScanOptions
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.ui.NeutronAlertDialog
 import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.ui.theme.errorLight
+import com.tecknobit.neutron.viewmodels.ProfileActivityViewModel
 import com.tecknobit.neutroncore.helpers.InputValidator.LANGUAGES_SUPPORTED
+import com.tecknobit.neutroncore.helpers.InputValidator.isEmailValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
@@ -117,6 +123,14 @@ class ProfileActivity : NeutronActivity() {
 
     private val currentStorageIsLocal = user.storage == Local
 
+    private val snackbarHostState by lazy {
+        SnackbarHostState()
+    }
+
+    private val viewModel = ProfileActivityViewModel(
+        snackbarHostState = snackbarHostState
+    )
+
     /**
      * **scanOptions** ->
      */
@@ -137,8 +151,8 @@ class ProfileActivity : NeutronActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             scanOptions.setPrompt(stringResource(R.string.qr_scanner_prompt_message))
-            theme = remember { mutableStateOf(user.theme) }
-            var profilePic by remember { mutableStateOf(user.profilePic) }
+            theme = remember { mutableStateOf(localUser.theme) }
+            val profilePic = remember { mutableStateOf(localUser.profilePic) }
             val photoPickerLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.PickVisualMedia(),
                 onResult = { imageUri ->
@@ -147,9 +161,10 @@ class ProfileActivity : NeutronActivity() {
                             context = this@ProfileActivity,
                             uri = imageUri
                         )
-                        // TODO: MAKE THE REQUEST THEN
-                        profilePic = imagePath
-                        user.profilePic = imagePath
+                        viewModel.changeProfilePic(
+                            imagePath = imagePath!!,
+                            profilePic = profilePic
+                        )
                     }
                 }
             )
@@ -161,6 +176,7 @@ class ProfileActivity : NeutronActivity() {
                 }
             ) {
                 Scaffold (
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                     floatingActionButton = {
                         val showDeleteAlert = remember { mutableStateOf(false) }
                         FloatingActionButton(
@@ -180,8 +196,9 @@ class ProfileActivity : NeutronActivity() {
                             title = R.string.delete,
                             text = R.string.delete_message,
                             confirmAction = {
-                                // TODO: MAKE THE REQUEST THEN
-                                navToSplash()
+                                viewModel.deleteAccount {
+                                    navToSplash()
+                                }
                             }
                         )
                     }
@@ -210,7 +227,7 @@ class ProfileActivity : NeutronActivity() {
                                         },
                                     contentScale = ContentScale.Crop,
                                     model = ImageRequest.Builder(this@ProfileActivity)
-                                        .data(profilePic)
+                                        .data(profilePic.value)
                                         .crossfade(true)
                                         .crossfade(500)
                                         .build(),
@@ -297,36 +314,50 @@ class ProfileActivity : NeutronActivity() {
                                 .verticalScroll(rememberScrollState())
                         ) {
                             val showChangeEmailAlert = remember { mutableStateOf(false) }
-                            var userEmail by remember { mutableStateOf(user.email) }
-                            val newEmail = remember { mutableStateOf("") }
+                            var userEmail by remember { mutableStateOf(localUser.email) }
+                            viewModel.newEmail = remember { mutableStateOf("") }
+                            viewModel.newEmailError = remember { mutableStateOf(false) }
+                            val resetEmailLayout = {
+                                viewModel.newEmail.value = ""
+                                viewModel.newEmailError.value = false
+                                showChangeEmailAlert.value = false
+                            }
                             UserInfo(
                                 header = R.string.email,
                                 info = userEmail,
                                 onClick = { showChangeEmailAlert.value = true }
                             )
                             NeutronAlertDialog(
-                                dismissAction = {
-                                    newEmail.value = ""
-                                    showChangeEmailAlert.value = false
-                                },
+                                onDismissAction = resetEmailLayout,
                                 icon = Icons.Default.Email,
                                 show = showChangeEmailAlert,
                                 title = R.string.change_email,
                                 text = {
                                     NeutronOutlinedTextField(
-                                        value = newEmail,
-                                        label = R.string.new_email
+                                        value = viewModel.newEmail,
+                                        label = R.string.new_email,
+                                        errorText = R.string.email_not_valid,
+                                        isError = viewModel.newEmailError,
+                                        validator = { isEmailValid(viewModel.newEmail.value) }
                                     )
                                 },
                                 confirmAction = {
-                                    // TODO: MAKE THE REQUEST AND SAVE IN LOCAL THEN
-                                    userEmail = newEmail.value
-                                    user.email = userEmail
-                                    showChangeEmailAlert.value = false
+                                    viewModel.changeEmail(
+                                        onSuccess = {
+                                            userEmail = viewModel.newEmail.value
+                                            resetEmailLayout.invoke()
+                                        }
+                                    )
                                 }
                             )
                             val showChangePasswordAlert = remember { mutableStateOf(false) }
-                            val newPassword = remember { mutableStateOf("") }
+                            viewModel.newPassword = remember { mutableStateOf("") }
+                            viewModel.newPasswordError = remember { mutableStateOf(false) }
+                            val resetPasswordLayout = {
+                                viewModel.newPassword.value = ""
+                                viewModel.newPasswordError.value = false
+                                showChangePasswordAlert.value = false
+                            }
                             var hiddenPassword by remember { mutableStateOf(true) }
                             UserInfo(
                                 header = R.string.password,
@@ -334,16 +365,13 @@ class ProfileActivity : NeutronActivity() {
                                 onClick = { showChangePasswordAlert.value = true }
                             )
                             NeutronAlertDialog(
-                                dismissAction = {
-                                    newPassword.value = ""
-                                    showChangePasswordAlert.value = false
-                                },
+                                onDismissAction = resetPasswordLayout,
                                 icon = Icons.Default.Password,
                                 show = showChangePasswordAlert,
                                 title = R.string.change_password,
                                 text = {
                                     NeutronOutlinedTextField(
-                                        value = newPassword,
+                                        value = viewModel.newPassword,
                                         label = R.string.new_password,
                                         trailingIcon = {
                                             IconButton(
@@ -364,25 +392,29 @@ class ProfileActivity : NeutronActivity() {
                                             VisualTransformation.None,
                                         keyboardOptions = KeyboardOptions(
                                             keyboardType = KeyboardType.Password
-                                        )
+                                        ),
+                                        errorText = R.string.password_not_valid,
+                                        isError = viewModel.newPasswordError,
+                                        validator = { isPasswordValid(viewModel.newPassword.value) }
                                     )
                                 },
                                 confirmAction = {
-                                    // TODO: MAKE THE REQUEST AND SAVE IN LOCAL THEN
-                                    showChangePasswordAlert.value = false
+                                    viewModel.changePassword(
+                                        onSuccess = resetPasswordLayout
+                                    )
                                 }
                             )
                             val changeLanguage = remember { mutableStateOf(false) }
                             UserInfo(
                                 header = R.string.language,
-                                info = LANGUAGES_SUPPORTED[user.language]!!,
+                                info = LANGUAGES_SUPPORTED[localUser.language]!!,
                                 onClick = { changeLanguage.value = true }
                             )
                             ChangeLanguage(
                                 changeLanguage = changeLanguage
                             )
                             val changeCurrency = remember { mutableStateOf(false) }
-                            val currency = remember { mutableStateOf(user.currency.isoName) }
+                            val currency = remember { mutableStateOf(localUser.currency.isoName) }
                             UserInfo(
                                 header = R.string.currency,
                                 info = currency.value,
@@ -395,7 +427,7 @@ class ProfileActivity : NeutronActivity() {
                             val changeTheme = remember { mutableStateOf(false) }
                             UserInfo(
                                 header = R.string.theme,
-                                info = user.theme.name,
+                                info = localUser.theme.name,
                                 buttonText = R.string.change,
                                 onClick = { changeTheme.value = true }
                             )
@@ -425,8 +457,9 @@ class ProfileActivity : NeutronActivity() {
                                 title = R.string.logout,
                                 text = R.string.logout_message,
                                 confirmAction = {
-                                    // TODO: MAKE THE OPE TO LOGOUT THEN
-                                    navToSplash()
+                                    viewModel.clearSession {
+                                        navToSplash()
+                                    }
                                 }
                             )
                         }
@@ -574,10 +607,13 @@ class ProfileActivity : NeutronActivity() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            // TODO: MAKE THE REQUEST THEN
-                            user.language = language
-                            changeLanguage.value = false
-                            navToSplash()
+                            viewModel.changeLanguage(
+                                newLanguage = language,
+                                onSuccess = {
+                                    changeLanguage.value = false
+                                    navToSplash()
+                                }
+                            )
                         }
                         .padding(
                             all = 16.dp
@@ -588,7 +624,7 @@ class ProfileActivity : NeutronActivity() {
                     Icon(
                         imageVector = Icons.Default.Flag,
                         contentDescription = null,
-                        tint = if(user.language == language)
+                        tint = if (localUser.language == language)
                             MaterialTheme.colorScheme.primary
                         else
                             LocalContentColor.current
@@ -617,10 +653,13 @@ class ProfileActivity : NeutronActivity() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            // TODO: MAKE THE REQUEST AND FETCH THE NEW CHANGE RATE THEN
-                            user.currency = currency
-                            currencyValue.value = currency.isoName
-                            changeCurrency.value = false
+                            viewModel.changeCurrency(
+                                newCurrency = currency,
+                                onSuccess = {
+                                    currencyValue.value = currency.isoName
+                                    changeCurrency.value = false
+                                }
+                            )
                         }
                         .padding(
                             all = 16.dp
@@ -631,7 +670,7 @@ class ProfileActivity : NeutronActivity() {
                     Icon(
                         imageVector = Icons.Default.Flag,
                         contentDescription = null,
-                        tint = if(user.currency == currency)
+                        tint = if (localUser.currency == currency)
                             MaterialTheme.colorScheme.primary
                         else
                             LocalContentColor.current
@@ -659,10 +698,13 @@ class ProfileActivity : NeutronActivity() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            // TODO: MAKE THE REQUEST THEN
-                            user.theme = theme
-                            changeTheme.value = false
-                            this@ProfileActivity.theme.value = theme
+                            viewModel.changeTheme(
+                                newTheme = theme,
+                                onChange = {
+                                    changeTheme.value = false
+                                    this@ProfileActivity.theme.value = theme
+                                }
+                            )
                         }
                         .padding(
                             all = 16.dp
@@ -677,7 +719,7 @@ class ProfileActivity : NeutronActivity() {
                             else -> Icons.Default.AutoMode
                         },
                         contentDescription = null,
-                        tint = if(user.theme == theme)
+                        tint = if (localUser.theme == theme)
                             MaterialTheme.colorScheme.primary
                         else
                             LocalContentColor.current

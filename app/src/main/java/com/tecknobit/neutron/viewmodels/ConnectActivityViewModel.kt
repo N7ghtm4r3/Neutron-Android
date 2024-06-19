@@ -17,6 +17,7 @@ import com.tecknobit.neutroncore.helpers.InputValidator.isNameValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isServerSecretValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isSurnameValid
+import com.tecknobit.neutroncore.records.User.LANGUAGE_KEY
 
 class ConnectActivityViewModel(
     snackbarHostState: SnackbarHostState,
@@ -65,15 +66,15 @@ class ConnectActivityViewModel(
     private fun signUp() {
         if (signUpFormIsValid()) {
             if (storeDataOnline.value) {
+                val currentLanguageTag = current.toLanguageTag().substringBefore("-")
+                var language = LANGUAGES_SUPPORTED[currentLanguageTag]
+                language = if (language == null)
+                    DEFAULT_LANGUAGE
+                else
+                    currentLanguageTag
                 requester.changeHost(host.value + BASE_ENDPOINT)
                 requester.sendRequest(
                     request = {
-                        val currentLanguageTag = current.toLanguageTag().substringBefore("-")
-                        var language = LANGUAGES_SUPPORTED[currentLanguageTag]
-                        language = if (language == null)
-                            DEFAULT_LANGUAGE
-                        else
-                            currentLanguageTag
                         requester.signUp(
                             serverSecret = serverSecret.value,
                             name = name.value,
@@ -83,7 +84,12 @@ class ConnectActivityViewModel(
                             language = language
                         )
                     },
-                    onSuccess = { response -> launchApp(response) },
+                    onSuccess = { response ->
+                        launchApp(
+                            language = language,
+                            response = response
+                        )
+                    },
                     onFailure = { showSnack(it) }
                 )
             } else {
@@ -142,7 +148,12 @@ class ConnectActivityViewModel(
                             password = password.value
                         )
                     },
-                    onSuccess = { response -> launchApp(response) },
+                    onSuccess = { response ->
+                        launchApp(
+                            language = response.getString(LANGUAGE_KEY),
+                            response = response
+                        )
+                    },
                     onFailure = { showSnack(it) }
                 )
             } else {
@@ -174,10 +185,13 @@ class ConnectActivityViewModel(
     }
 
     private fun launchApp(
-        response: JsonHelper
+        response: JsonHelper,
+        language: String
     ) {
         localUser.insertNewUser(
             host.value,
+            email.value,
+            language,
             response
         )
         context.startActivity(Intent(context, MainActivity::class.java))

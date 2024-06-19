@@ -65,7 +65,7 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import com.tecknobit.apimanager.annotations.Wrapper
 import com.tecknobit.apimanager.formatters.TimeFormatter
 import com.tecknobit.neutron.R
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.ui.NeutronButton
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
@@ -142,7 +142,7 @@ abstract class AddRevenueActivity: ComponentActivity() {
                                     start = 32.dp,
                                     end = 32.dp
                                 ),
-                            text = "${revenueValue.value}${user.currency.symbol}",
+                            text = "${revenueValue.value}${localUser.currency.symbol}",
                             color = Color.White,
                             fontFamily = displayFontFamily,
                             fontSize = 50.sp,

@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.revenues
 import com.tecknobit.neutron.activities.session.addactivities.AddTicketActivity
 import com.tecknobit.neutron.ui.EmptyListUI
@@ -130,7 +130,7 @@ class ProjectRevenueActivity : NeutronActivity() {
                                     text = stringResource(
                                         R.string.total_revenues,
                                         projectRevenue.value.value,
-                                        user.currency.symbol
+                                        localUser.currency.symbol
                                     ),
                                     color = Color.White
                                 )

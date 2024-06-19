@@ -44,6 +44,7 @@ import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.auth.ConnectActivity
 import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutron.helpers.AndroidLocalUser
+import com.tecknobit.neutron.helpers.AndroidNeutronRequester
 import com.tecknobit.neutron.helpers.BiometricPromptManager
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationNotSet
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationSuccess
@@ -53,7 +54,6 @@ import com.tecknobit.neutron.ui.theme.AppTypography
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.viewmodels.NeutronViewModel.Companion.requester
-import com.tecknobit.neutroncore.helpers.NeutronRequester
 import com.tecknobit.neutroncore.records.User
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.RevenueLabel
@@ -188,7 +188,7 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
                         MainActivity::class.java
                     else
                         ConnectActivity::class.java
-                    requester = NeutronRequester(
+                    requester = AndroidNeutronRequester(
                         host = localUser.hostAddress,
                         userId = localUser.userId,
                         userToken = localUser.userToken
@@ -274,12 +274,17 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
      * use for test only or in a private distribution on own infrastructure
      */
     private fun validateSelfSignedCertificate(): Array<TrustManager> {
-        return arrayOf(object : X509TrustManager {
+        return arrayOf(
+            @SuppressLint("CustomX509TrustManager")
+            object : X509TrustManager {
             override fun getAcceptedIssuers(): Array<X509Certificate> {
                 return arrayOf()
             }
 
+                @SuppressLint("TrustAllX509TrustManager")
             override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) {}
+
+                @SuppressLint("TrustAllX509TrustManager")
             override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) {}
         })
     }
