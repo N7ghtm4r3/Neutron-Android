@@ -18,10 +18,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,140 +46,36 @@ import com.tecknobit.neutron.ui.getWalletBalance
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.bodyFontFamily
 import com.tecknobit.neutron.ui.theme.displayFontFamily
-import com.tecknobit.neutroncore.records.revenues.GeneralRevenue
+import com.tecknobit.neutron.viewmodels.MainActivityViewModel
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue.IDENTIFIER_KEY
-import com.tecknobit.neutroncore.records.revenues.InitialRevenue
-import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.Revenue
-import com.tecknobit.neutroncore.records.revenues.RevenueLabel
-import com.tecknobit.neutroncore.records.revenues.TicketRevenue
 
 class MainActivity : NeutronActivity() {
 
     companion object {
 
-        val revenues = mutableStateListOf<Revenue>()
+        lateinit var revenues: State<MutableList<Revenue>?>
 
     }
+
+    private val snackbarHostState by lazy {
+        SnackbarHostState()
+    }
+
+    private val viewModel = MainActivityViewModel(
+        snackbarHostState = snackbarHostState
+    )
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // TODO: LOAD CORRECTLY
-        if(revenues.isEmpty()) {
-            revenues.add(
-                ProjectRevenue(
-                    "gag",
-                    "Prova",
-                    System.currentTimeMillis(),
-                    InitialRevenue(
-                        "gaga",
-                        2000.0,
-                        System.currentTimeMillis()
-                    ),
-                    listOf(
-                        TicketRevenue(
-                            "g11aga",
-                            "Ciao",
-                            1000.0,
-                            System.currentTimeMillis(),
-                            "gaaga",
-                            1715893715000L
-                        ),
-                        TicketRevenue(
-                            "g1aga",
-                            "Ciao",
-                            1000.0,
-                            System.currentTimeMillis(),
-                            "gaaga",
-                            System.currentTimeMillis()
-                        ),
-                        TicketRevenue(
-                            "gaga",
-                            "Ciao",
-                            1000.0,
-                            System.currentTimeMillis(),
-                            "gaaga",
-                            System.currentTimeMillis()
-                        ),
-                        TicketRevenue(
-                            "25gaga",
-                            "Ciao",
-                            1000.0,
-                            System.currentTimeMillis(),
-                            "gaaga",
-                            System.currentTimeMillis()
-                        ),
-                        TicketRevenue(
-                            "24gaga",
-                            "Ciao",
-                            1000.0,
-                            System.currentTimeMillis(),
-                            "gaaga"
-                        ),
-                        TicketRevenue(
-                            "4gaga",
-                            "Ciao",
-                            1000.0,
-                            System.currentTimeMillis(),
-                            "gaaga",
-                            System.currentTimeMillis()
-                        ),
-                        TicketRevenue(
-                            "3gaga",
-                            "Ciao",
-                            1000.0,
-                            System.currentTimeMillis(),
-                            "gaaga"
-                        )
-                    )
-                )
-            )
-            revenues.add(
-                GeneralRevenue(
-                    "aaa",
-                    "General",
-                    100000.0,
-                    System.currentTimeMillis(),
-                    listOf(
-                        RevenueLabel(
-                            "ff",
-                            "Prog",
-                            "#33A396",
-                            null
-                        ),
-                        RevenueLabel(
-                            "sff",
-                            "Proggag",
-                            "#8BAEA2",
-                            null
-                        ),
-                        RevenueLabel(
-                            "sffa",
-                            "cfnafna",
-                            "#59EC21",
-                            null
-                        )
-                    ),
-                    "Lorem Ipsum è un testo segnaposto utilizzato nel settore della tipografia e della stampa. Lorem Ipsum è considerato il testo segnaposto standard sin dal sedicesimo secolo, quando un anonimo tipografo prese una cassetta di caratteri e li assemblò per preparare un testo campione. È sopravvissuto non solo a più di cinque secoli, ma anche al passaggio alla videoimpaginazione, pervenendoci sostanzialmente inalterato. Fu reso popolare, negli anni ’60, con la diffusione dei fogli di caratteri trasferibili “Letraset”, che contenevano passaggi del Lorem Ipsum, e più recentemente da software di impaginazione come Aldus PageMaker, che includeva versioni del Lorem Ipsum."
-                )
-            )
-            revenues.add(
-                GeneralRevenue(
-                    "aaaa",
-                    "General",
-                    2000.0,
-                    System.currentTimeMillis(),
-                    emptyList(),
-                    "Prova\nagag\naagagaga\nanan\n"
-                )
-            )
-        }
         setContent {
-            // TODO: USE THE REAL DATA
+            viewModel.getRevenuesList()
+            revenues = viewModel.revenues.observeAsState()
             val walletTrendPercent by remember { mutableDoubleStateOf(1.0) }
             NeutronTheme {
                 Scaffold (
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                     floatingActionButton = {
                         FloatingActionButton(
                             onClick = {
@@ -212,7 +111,8 @@ class MainActivity : NeutronActivity() {
                                         verticalArrangement = Arrangement.spacedBy(5.dp)
                                     ) {
                                         Text(
-                                            text = "${revenues.getWalletBalance()}${localUser.currency.symbol}",
+                                            text = "${revenues.value!!.getWalletBalance()}" +
+                                                    localUser.currency.symbol,
                                             fontFamily = bodyFontFamily,
                                             fontSize = 35.sp,
                                             color = Color.White
@@ -262,9 +162,12 @@ class MainActivity : NeutronActivity() {
                         },
                         uiContent = {
                             DisplayRevenues(
-                                revenues = revenues,
+                                revenues = revenues.value!!,
                                 navToProject = { revenue ->
-                                    val intent = Intent(this@MainActivity, ProjectRevenueActivity::class.java)
+                                    val intent = Intent(
+                                        this@MainActivity,
+                                        ProjectRevenueActivity::class.java
+                                    )
                                     intent.putExtra(IDENTIFIER_KEY, revenue.id)
                                     startActivity(intent)
                                 }
@@ -279,6 +182,11 @@ class MainActivity : NeutronActivity() {
                 finishAffinity()
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setActiveContext(this)
     }
 
 }

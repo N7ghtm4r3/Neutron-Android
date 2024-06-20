@@ -59,7 +59,7 @@ class ProjectRevenueActivity : NeutronActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val currentProjectRevenue = revenues.getProjectRevenue(
+            val currentProjectRevenue = revenues.value!!.getProjectRevenue(
                 intent.getStringExtra(GeneralRevenue.IDENTIFIER_KEY)!!
             )
             showDeleteProject = remember { mutableStateOf(false) }

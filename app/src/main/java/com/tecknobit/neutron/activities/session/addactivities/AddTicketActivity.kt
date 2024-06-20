@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tecknobit.neutron.R
-import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutron.activities.session.MainActivity.Companion.revenues
 import com.tecknobit.neutron.activities.session.ProjectRevenueActivity
 import com.tecknobit.neutron.ui.ErrorUI
 import com.tecknobit.neutron.ui.NeutronButton
@@ -51,7 +51,7 @@ class AddTicketActivity : AddRevenueActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NeutronTheme {
-                currentProjectRevenue = MainActivity.revenues.getProjectRevenue(
+                currentProjectRevenue = revenues.value!!.getProjectRevenue(
                     intent.getStringExtra(IDENTIFIER_KEY)!!
                 )
                 if(currentProjectRevenue != null)

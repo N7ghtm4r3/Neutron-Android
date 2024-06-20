@@ -100,7 +100,7 @@ lateinit var PROJECT_LABEL: RevenueLabel
 
 @Composable
 fun DisplayRevenues(
-    revenues: SnapshotStateList<Revenue>,
+    revenues: MutableList<Revenue>,
     navToProject: (Revenue) -> Unit
 ) {
     if(revenues.isNotEmpty()) {
