@@ -60,7 +60,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -122,10 +121,6 @@ class ProfileActivity : NeutronActivity() {
     private lateinit var hostLocalSignIn: MutableState<Boolean>
 
     private val currentStorageIsLocal = user.storage == Local
-
-    private val snackbarHostState by lazy {
-        SnackbarHostState()
-    }
 
     private val viewModel = ProfileActivityViewModel(
         snackbarHostState = snackbarHostState
@@ -1008,6 +1003,11 @@ class ProfileActivity : NeutronActivity() {
 
     private fun navToSplash() {
         startActivity(Intent(this@ProfileActivity, Splashscreen::class.java))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setActiveContext(this)
     }
 
 }

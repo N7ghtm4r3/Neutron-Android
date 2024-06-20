@@ -3,6 +3,7 @@ package com.tecknobit.neutron.activities.session
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,11 +20,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -44,29 +47,35 @@ import com.tecknobit.neutron.ui.SwipeToDeleteContainer
 import com.tecknobit.neutron.ui.getProjectRevenue
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
+import com.tecknobit.neutron.viewmodels.ProjectRevenueActivityViewModel
 import com.tecknobit.neutroncore.records.NeutronItem.IDENTIFIER_KEY
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 
 class ProjectRevenueActivity : NeutronActivity() {
 
-    private lateinit var projectRevenue: MutableState<ProjectRevenue>
+    private lateinit var projectRevenue: State<ProjectRevenue?>
 
-    private lateinit var showDeleteProject: MutableState<Boolean>
+    private val viewModel: ProjectRevenueActivityViewModel = ProjectRevenueActivityViewModel(
+        snackbarHostState = snackbarHostState
+    )
 
     @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val currentProjectRevenue = revenues.getProjectRevenue(
+            val currentProjectRevenue = revenues.value!!.getProjectRevenue(
                 intent.getStringExtra(GeneralRevenue.IDENTIFIER_KEY)!!
             )
-            showDeleteProject = remember { mutableStateOf(false) }
+            viewModel.showDeleteProject = remember { mutableStateOf(false) }
             NeutronTheme {
                 if(currentProjectRevenue != null) {
-                    projectRevenue = remember { mutableStateOf(currentProjectRevenue) }
+                    viewModel.setInitialProjectRevenue(currentProjectRevenue)
+                    viewModel.getProjectRevenue()
+                    projectRevenue = viewModel.projectRevenue.observeAsState()
                     Scaffold (
+                        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                         topBar = {
                             TopAppBar(
                                 colors = TopAppBarDefaults.topAppBarColors(
@@ -86,7 +95,7 @@ class ProjectRevenueActivity : NeutronActivity() {
                                 title = {},
                                 actions = {
                                     IconButton(
-                                        onClick = { showDeleteProject.value = true }
+                                        onClick = { viewModel.showDeleteProject.value = true }
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
@@ -121,7 +130,7 @@ class ProjectRevenueActivity : NeutronActivity() {
                             cardHeight = 85.dp,
                             cardContent = {
                                 Text(
-                                    text = projectRevenue.value.title,
+                                    text = projectRevenue.value!!.title,
                                     fontFamily = displayFontFamily,
                                     color = Color.White,
                                     fontSize = 25.sp
@@ -129,19 +138,19 @@ class ProjectRevenueActivity : NeutronActivity() {
                                 Text(
                                     text = stringResource(
                                         R.string.total_revenues,
-                                        projectRevenue.value.value,
+                                        projectRevenue.value!!.value,
                                         localUser.currency.symbol
                                     ),
                                     color = Color.White
                                 )
                             },
                             uiContent = {
-                                val tickets = projectRevenue.value.tickets.toMutableList()
+                                val tickets = projectRevenue.value!!.tickets.toMutableList()
                                 if(tickets.isNotEmpty()) {
                                     LazyColumn {
                                         item {
                                             GeneralRevenue(
-                                                revenue = projectRevenue.value.initialRevenue
+                                                revenue = projectRevenue.value!!.initialRevenue
                                             )
                                         }
                                         items(
@@ -152,13 +161,16 @@ class ProjectRevenueActivity : NeutronActivity() {
                                                 item = ticket,
                                                 onRight = if(!ticket.isClosed) {
                                                     {
-                                                        // TODO: MAKE REQUEST THEN
+                                                        viewModel.closeTicket(
+                                                            ticket = ticket
+                                                        )
                                                     }
                                                 } else
                                                     null,
                                                 onDelete = {
-                                                    // TODO: MAKE REQUEST THEN
-                                                    tickets.remove(ticket)
+                                                    viewModel.deleteTicket(
+                                                        ticket = ticket
+                                                    )
                                                 }
                                             ) {
                                                 GeneralRevenue(
@@ -170,7 +182,7 @@ class ProjectRevenueActivity : NeutronActivity() {
                                     }
                                 } else {
                                     GeneralRevenue(
-                                        revenue = projectRevenue.value.initialRevenue
+                                        revenue = projectRevenue.value!!.initialRevenue
                                     )
                                     EmptyListUI(
                                         icon = Icons.AutoMirrored.Filled.StickyNote2,
@@ -184,24 +196,41 @@ class ProjectRevenueActivity : NeutronActivity() {
                     ErrorUI()
             }
         }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                navBack()
+            }
+        })
     }
 
     @Composable
     private fun DeleteProjectRevenue() {
+        if (viewModel.showDeleteProject.value)
+            viewModel.suspendRefresher()
         NeutronAlertDialog(
             icon = Icons.Default.Delete,
-            show = showDeleteProject,
+            onDismissAction = {
+                viewModel.showDeleteProject.value = false
+                viewModel.restartRefresher()
+            },
+            show = viewModel.showDeleteProject,
             title = R.string.delete_project,
             text = R.string.delete_project_warn_text,
             confirmAction = {
-                // TODO: MAKE THE REQUEST THEN
-                navBack()
+                viewModel.deleteProjectRevenue {
+                    navBack()
+                }
             }
         )
     }
 
     private fun navBack() {
         startActivity(Intent(this@ProjectRevenueActivity, MainActivity::class.java))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setActiveContext(this)
     }
 
 }

@@ -32,17 +32,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.tecknobit.neutron.R
-import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutron.activities.session.MainActivity.Companion.revenues
 import com.tecknobit.neutron.activities.session.ProjectRevenueActivity
 import com.tecknobit.neutron.ui.ErrorUI
 import com.tecknobit.neutron.ui.NeutronButton
 import com.tecknobit.neutron.ui.NeutronTextField
 import com.tecknobit.neutron.ui.getProjectRevenue
 import com.tecknobit.neutron.ui.theme.NeutronTheme
+import com.tecknobit.neutron.viewmodels.addactivities.AddTicketViewModel
+import com.tecknobit.neutroncore.helpers.InputValidator.isRevenueDescriptionValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isRevenueTitleValid
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue.IDENTIFIER_KEY
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 
 class AddTicketActivity : AddRevenueActivity() {
+
+    private val viewModel = AddTicketViewModel(
+        snackbarHostState = snackbarHostState
+    )
 
     private var currentProjectRevenue: ProjectRevenue? = null
 
@@ -51,12 +58,15 @@ class AddTicketActivity : AddRevenueActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NeutronTheme {
-                currentProjectRevenue = MainActivity.revenues.getProjectRevenue(
+                currentProjectRevenue = revenues.value!!.getProjectRevenue(
                     intent.getStringExtra(IDENTIFIER_KEY)!!
                 )
-                if(currentProjectRevenue != null)
-                    AddRevenueUI()
-                else
+                if (currentProjectRevenue != null) {
+                    viewModel.revenueValue = remember { mutableStateOf("0") }
+                    AddRevenueUI(
+                        revenueValue = viewModel.revenueValue
+                    )
+                } else
                     ErrorUI()
             }
         }
@@ -70,11 +80,19 @@ class AddTicketActivity : AddRevenueActivity() {
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            revenueTitle = remember { mutableStateOf("") }
-            revenueDescription = remember { mutableStateOf("") }
+            viewModel.revenueTitle = remember { mutableStateOf("") }
+            viewModel.revenueTitleError = remember { mutableStateOf(false) }
+            viewModel.revenueDescription = remember { mutableStateOf("") }
+            viewModel.revenueDescriptionError = remember { mutableStateOf(false) }
             var isClosed by remember { mutableStateOf(false) }
-            val currentOpeningDate = remember { mutableStateOf(formatter.formatAsNowString(dateFormat)) }
-            val currentClosingDate = remember { mutableStateOf(formatter.formatAsNowString(dateFormat)) }
+            viewModel.currentOpeningDate =
+                remember { mutableStateOf(formatter.formatAsNowString(dateFormat)) }
+            viewModel.currentClosingDate =
+                remember { mutableStateOf(formatter.formatAsNowString(dateFormat)) }
+            viewModel.currentOpeningTime =
+                remember { mutableStateOf(formatter.formatAsNowString(timeFormat)) }
+            viewModel.currentClosingTime =
+                remember { mutableStateOf(formatter.formatAsNowString(timeFormat)) }
             val displayDatePickerDialog = remember { mutableStateOf(false) }
             val dateState = rememberDatePickerState(
                 initialSelectedDateMillis = System.currentTimeMillis(),
@@ -82,7 +100,7 @@ class AddTicketActivity : AddRevenueActivity() {
                     object : SelectableDates {
                         override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                             return utcTimeMillis <= formatter.formatAsTimestamp(
-                                currentClosingDate.value,
+                                viewModel.currentClosingDate.value,
                                 dateFormat
                             )
                         }
@@ -90,7 +108,6 @@ class AddTicketActivity : AddRevenueActivity() {
                 } else
                     DatePickerDefaults.AllDates
             )
-            val currentOpeningTime = remember { mutableStateOf(formatter.formatAsNowString(timeFormat)) }
             val displayTimePickerDialog = remember { mutableStateOf(false) }
             val timePickerState = getTimePickerState()
             val displayClosingDatePickerDialog = remember { mutableStateOf(false) }
@@ -99,13 +116,12 @@ class AddTicketActivity : AddRevenueActivity() {
                 selectableDates = object : SelectableDates {
                     override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                         return utcTimeMillis >= formatter.formatAsTimestamp(
-                            currentOpeningDate.value,
+                            viewModel.currentOpeningDate.value,
                             dateFormat
                         )
                     }
                 }
             )
-            val currentClosingTime = remember { mutableStateOf(formatter.formatAsNowString(timeFormat)) }
             val displayClosingTimePickerDialog = remember { mutableStateOf(false) }
             val timeClosingPickerState = getTimePickerState()
             Column (
@@ -138,8 +154,11 @@ class AddTicketActivity : AddRevenueActivity() {
                 NeutronTextField(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    value = revenueTitle,
-                    label = R.string.title
+                    value = viewModel.revenueTitle,
+                    label = R.string.title,
+                    errorText = R.string.title_not_valid,
+                    isError = viewModel.revenueTitleError,
+                    validator = { isRevenueTitleValid(viewModel.revenueTitle.value) }
                 )
                 NeutronTextField(
                     modifier = Modifier
@@ -147,36 +166,42 @@ class AddTicketActivity : AddRevenueActivity() {
                         .heightIn(
                             max = 250.dp
                         ),
-                    value = revenueDescription,
+                    value = viewModel.revenueDescription,
                     label = R.string.description,
-                    isTextArea = true
+                    isTextArea = true,
+                    errorText = R.string.description_not_valid,
+                    isError = viewModel.revenueDescriptionError,
+                    validator = { isRevenueDescriptionValid(viewModel.revenueDescription.value) }
                 )
                 TimeInfoSection(
                     dateTitle = R.string.opening_date_title,
-                    date = currentOpeningDate,
+                    date = viewModel.currentOpeningDate,
                     displayDatePickerDialog = displayDatePickerDialog,
                     dateState = dateState,
                     timeTitle = R.string.opening_time,
-                    time = currentOpeningTime,
+                    time = viewModel.currentOpeningTime,
                     displayTimePickerDialog = displayTimePickerDialog,
                     timePickerState = timeClosingPickerState
                 )
                 if(isClosed) {
                     TimeInfoSection(
                         dateTitle = R.string.closing_date_title,
-                        date = currentClosingDate,
+                        date = viewModel.currentClosingDate,
                         displayDatePickerDialog = displayClosingDatePickerDialog,
                         dateState = dateClosingState,
                         timeTitle = R.string.closing_time,
-                        time = currentClosingTime,
+                        time = viewModel.currentClosingTime,
                         displayTimePickerDialog = displayClosingTimePickerDialog,
                         timePickerState = timePickerState
                     )
                 }
                 NeutronButton(
                     onClick = {
-                        // TODO: MAKE THE REQUEST THEN
-                        navBack()
+                        viewModel.addTicket(
+                            projectRevenue = currentProjectRevenue!!,
+                            isClosed = isClosed,
+                            onSuccess = { navBack() }
+                        )
                     },
                     text = R.string.add_ticket
                 )
@@ -193,6 +218,11 @@ class AddTicketActivity : AddRevenueActivity() {
                 startActivity(intent)
             }
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setActiveContext(this)
     }
 
 }

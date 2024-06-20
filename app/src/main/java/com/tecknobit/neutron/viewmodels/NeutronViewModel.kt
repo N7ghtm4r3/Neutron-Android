@@ -1,9 +1,11 @@
 package com.tecknobit.neutron.viewmodels
 
+import android.content.Context
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import com.tecknobit.apimanager.formatters.JsonHelper
 import com.tecknobit.equinox.FetcherManager
+import com.tecknobit.equinox.FetcherManager.Companion.activeContext
 import com.tecknobit.equinox.FetcherManager.FetcherManagerWrapper
 import com.tecknobit.equinox.Requester
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
@@ -69,6 +71,12 @@ open class NeutronViewModel(
 
     protected fun workInLocal(): Boolean {
         return localUser.storage == Local
+    }
+
+    fun setActiveContext(
+        context: Context
+    ) {
+        activeContext = context::class.java
     }
 
 }
