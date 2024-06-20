@@ -54,7 +54,6 @@ import com.tecknobit.neutron.ui.theme.AppTypography
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
 import com.tecknobit.neutron.viewmodels.NeutronViewModel.Companion.requester
-import com.tecknobit.neutroncore.records.User
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.RevenueLabel
 import okhttp3.OkHttpClient
@@ -70,9 +69,6 @@ import javax.net.ssl.X509TrustManager
 class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
 
     companion object {
-
-        // TODO: TO INIT CORRECTLY
-        val user = User()
 
         lateinit var localUser: AndroidLocalUser
 

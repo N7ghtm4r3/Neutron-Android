@@ -55,6 +55,7 @@ class ProjectRevenueActivityViewModel(
     fun closeTicket(
         ticket: TicketRevenue
     ) {
+        suspendRefresher()
         requester.sendRequest(
             request = {
                 requester.closeProjectRevenueTicket(
@@ -62,8 +63,13 @@ class ProjectRevenueActivityViewModel(
                     ticket = ticket
                 )
             },
-            onSuccess = {},
-            onFailure = { showSnack(it) }
+            onSuccess = {
+                restartRefresher()
+            },
+            onFailure = {
+                restartRefresher()
+                showSnack(it)
+            }
         )
     }
 

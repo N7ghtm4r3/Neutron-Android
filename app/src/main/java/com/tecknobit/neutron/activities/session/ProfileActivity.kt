@@ -91,7 +91,6 @@ import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.user
 import com.tecknobit.neutron.ui.NeutronAlertDialog
 import com.tecknobit.neutron.ui.NeutronOutlinedTextField
 import com.tecknobit.neutron.ui.theme.NeutronTheme
@@ -120,7 +119,7 @@ class ProfileActivity : NeutronActivity() {
 
     private lateinit var hostLocalSignIn: MutableState<Boolean>
 
-    private val currentStorageIsLocal = user.storage == Local
+    private val currentStorageIsLocal = localUser.storage == Local
 
     private val viewModel = ProfileActivityViewModel(
         snackbarHostState = snackbarHostState
@@ -296,7 +295,7 @@ class ProfileActivity : NeutronActivity() {
                                         )
                                         .fillMaxWidth()
                                         .align(Alignment.BottomStart),
-                                    text = user.completeName,
+                                    text = localUser.completeName,
                                     color = Color.White,
                                     fontFamily = displayFontFamily,
                                     fontSize = 20.sp
@@ -432,7 +431,7 @@ class ProfileActivity : NeutronActivity() {
                             val showChangeStorage = remember { mutableStateOf(false) }
                             UserInfo(
                                 header = R.string.storage_data,
-                                info = user.storage.name,
+                                info = localUser.storage.name,
                                 buttonText = R.string.change,
                                 onClick = { showChangeStorage.value = true }
                             )
@@ -854,7 +853,7 @@ class ProfileActivity : NeutronActivity() {
                                     if(success.value) {
                                         resetLayout.invoke()
                                         changeStorage.value = false
-                                        user.storage = if(currentStorageIsLocal)
+                                        localUser.storage = if (currentStorageIsLocal)
                                             Online
                                         else
                                             Local

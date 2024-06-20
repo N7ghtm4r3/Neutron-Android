@@ -17,7 +17,11 @@ import com.tecknobit.neutroncore.helpers.InputValidator.isNameValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isServerSecretValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isSurnameValid
+import com.tecknobit.neutroncore.records.User.IDENTIFIER_KEY
 import com.tecknobit.neutroncore.records.User.LANGUAGE_KEY
+import com.tecknobit.neutroncore.records.User.NAME_KEY
+import com.tecknobit.neutroncore.records.User.SURNAME_KEY
+import com.tecknobit.neutroncore.records.User.TOKEN_KEY
 
 class ConnectActivityViewModel(
     snackbarHostState: SnackbarHostState,
@@ -86,7 +90,9 @@ class ConnectActivityViewModel(
                     },
                     onSuccess = { response ->
                         launchApp(
-                            language = language,
+                            name = name.value,
+                            surname = surname.value,
+                            language = response.getString(LANGUAGE_KEY),
                             response = response
                         )
                     },
@@ -150,6 +156,8 @@ class ConnectActivityViewModel(
                     },
                     onSuccess = { response ->
                         launchApp(
+                            name = response.getString(NAME_KEY),
+                            surname = response.getString(SURNAME_KEY),
                             language = response.getString(LANGUAGE_KEY),
                             response = response
                         )
@@ -186,10 +194,18 @@ class ConnectActivityViewModel(
 
     private fun launchApp(
         response: JsonHelper,
+        name: String,
+        surname: String,
         language: String
     ) {
+        requester.setUserCredentials(
+            userId = response.getString(IDENTIFIER_KEY),
+            userToken = response.getString(TOKEN_KEY)
+        )
         localUser.insertNewUser(
             host.value,
+            name,
+            surname,
             email.value,
             language,
             response

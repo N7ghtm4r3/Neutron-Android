@@ -1,7 +1,6 @@
 package com.tecknobit.neutron.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
@@ -507,7 +506,13 @@ fun <T> SwipeToDeleteContainer(
             onDelete(item)
         }
     }
-    val boxContent: @Composable AnimatedVisibilityScope.() -> Unit = {
+    AnimatedVisibility(
+        visible = !isRemoved,
+        exit = shrinkVertically(
+            animationSpec = tween(durationMillis = animationDuration),
+            shrinkTowards = Alignment.Top
+        ) + fadeOut()
+    ) {
         SwipeToDismissBox(
             state = state,
             backgroundContent = {
@@ -518,22 +523,6 @@ fun <T> SwipeToDeleteContainer(
             enableDismissFromStartToEnd = onRight != null
         )
     }
-    AnimatedVisibility(
-        visible = !isRemoved,
-        exit = shrinkVertically(
-            animationSpec = tween(durationMillis = animationDuration),
-            shrinkTowards = Alignment.Top
-        ) + fadeOut(),
-        content = boxContent
-    )
-    /*AnimatedVisibility(
-        visible = !isRemoved,
-        exit = shrinkVertically(
-            animationSpec = tween(durationMillis = animationDuration),
-            shrinkTowards = Alignment.Top
-        ) + fadeOut(),
-        content = boxContent
-    )*/
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
