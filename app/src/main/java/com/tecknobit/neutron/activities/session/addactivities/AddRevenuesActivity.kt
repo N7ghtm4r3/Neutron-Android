@@ -163,7 +163,7 @@ class AddRevenuesActivity : AddRevenueActivity() {
                     label = R.string.title,
                     errorText = R.string.title_not_valid,
                     isError = viewModel.revenueTitleError,
-                    validator = { isRevenueTitleValid(viewModel.revenueTitle.value) }
+                    validator = { isRevenueTitleValid(it) }
                 )
                 if(!isProjectRevenue) {
                     NeutronTextField(
@@ -177,7 +177,7 @@ class AddRevenuesActivity : AddRevenueActivity() {
                         isTextArea = true,
                         errorText = R.string.description_not_valid,
                         isError = viewModel.revenueDescriptionError,
-                        validator = { isRevenueDescriptionValid(viewModel.revenueDescription.value) }
+                        validator = { isRevenueDescriptionValid(it) }
                     )
                     viewModel.labels = remember { mutableStateListOf() }
                     Labels(

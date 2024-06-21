@@ -99,7 +99,9 @@ import com.tecknobit.neutron.ui.theme.errorLight
 import com.tecknobit.neutron.viewmodels.ProfileActivityViewModel
 import com.tecknobit.neutroncore.helpers.InputValidator.LANGUAGES_SUPPORTED
 import com.tecknobit.neutroncore.helpers.InputValidator.isEmailValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isHostValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isServerSecretValid
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
@@ -331,7 +333,7 @@ class ProfileActivity : NeutronActivity() {
                                         label = R.string.new_email,
                                         errorText = R.string.email_not_valid,
                                         isError = viewModel.newEmailError,
-                                        validator = { isEmailValid(viewModel.newEmail.value) }
+                                        validator = { isEmailValid(it) }
                                     )
                                 },
                                 confirmAction = {
@@ -388,7 +390,7 @@ class ProfileActivity : NeutronActivity() {
                                         ),
                                         errorText = R.string.password_not_valid,
                                         isError = viewModel.newPasswordError,
-                                        validator = { isPasswordValid(viewModel.newPassword.value) }
+                                        validator = { isPasswordValid(it) }
                                     )
                                 },
                                 confirmAction = {
@@ -732,8 +734,10 @@ class ProfileActivity : NeutronActivity() {
     private fun ChangeStorage(
         changeStorage: MutableState<Boolean>
     ) {
-        val hostAddress = remember { mutableStateOf("") }
-        val serverSecret = remember { mutableStateOf("") }
+        viewModel.hostAddress = remember { mutableStateOf("") }
+        viewModel.hostError = remember { mutableStateOf(false) }
+        viewModel.serverSecret = remember { mutableStateOf("") }
+        viewModel.serverSecretError = remember { mutableStateOf(false) }
         viewModel.isExecuting = remember { mutableStateOf(false) }
         viewModel.waiting = remember { mutableStateOf(true) }
         viewModel.success = remember { mutableStateOf(false) }
@@ -741,15 +745,14 @@ class ProfileActivity : NeutronActivity() {
             viewModel.isExecuting.value = true
             viewModel.waiting.value = true
             viewModel.success.value = false
-            viewModel.changeStorage(
-                hostAddress = hostAddress.value,
-                serverSecret = serverSecret.value
-            )
+            viewModel.changeStorage()
         }
         val resetLayout = {
             viewModel.isExecuting.value = false
-            hostAddress.value = ""
-            serverSecret.value = ""
+            viewModel.hostAddress.value = ""
+            viewModel.hostError.value = false
+            viewModel.serverSecret.value = ""
+            viewModel.serverSecretError.value = false
             changeStorage.value = false
             viewModel.waiting.value = true
             viewModel.success.value = false
@@ -789,17 +792,23 @@ class ProfileActivity : NeutronActivity() {
                         NeutronOutlinedTextField(
                             modifier = Modifier
                                 .width(300.dp),
-                            value = hostAddress,
+                            value = viewModel.hostAddress,
                             label = R.string.host_address,
                             keyboardOptions = KeyboardOptions(
                                 imeAction = ImeAction.Next
-                            )
+                            ),
+                            errorText = R.string.host_address_not_valid,
+                            isError = viewModel.hostError,
+                            validator = { isHostValid(it) }
                         )
                         NeutronOutlinedTextField(
                             modifier = Modifier
                                 .width(300.dp),
-                            value = serverSecret,
-                            label = R.string.server_secret
+                            value = viewModel.serverSecret,
+                            label = R.string.server_secret,
+                            errorText = R.string.server_secret_not_valid,
+                            isError = viewModel.serverSecretError,
+                            validator = { isServerSecretValid(it) }
                         )
                     }
                 } else {

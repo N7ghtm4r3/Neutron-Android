@@ -6,7 +6,9 @@ import com.tecknobit.apimanager.formatters.JsonHelper
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.helpers.AndroidNeutronRequester
 import com.tecknobit.neutroncore.helpers.InputValidator.isEmailValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isHostValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
+import com.tecknobit.neutroncore.helpers.InputValidator.isServerSecretValid
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.NeutronCurrency
 import com.tecknobit.neutroncore.records.User.PROFILE_PIC_KEY
@@ -29,6 +31,14 @@ class ProfileActivityViewModel(
     lateinit var newPassword: MutableState<String>
 
     lateinit var newPasswordError: MutableState<Boolean>
+
+    lateinit var hostAddress: MutableState<String>
+
+    lateinit var hostError: MutableState<Boolean>
+
+    lateinit var serverSecret: MutableState<String>
+
+    lateinit var serverSecretError: MutableState<Boolean>
 
     lateinit var isExecuting: MutableState<Boolean>
 
@@ -156,50 +166,47 @@ class ProfileActivityViewModel(
         onChange.invoke()
     }
 
-    fun changeStorage(
-        hostAddress: String,
-        serverSecret: String
-    ) {
+    fun changeStorage() {
         success.value = false
-        if(workInLocal()) {
-            transferIn(
-                hostAddress = hostAddress,
-                serverSecret = serverSecret
-            )
-        } else
+        if(workInLocal())
+            transferIn()
+        else
             transferOut()
     }
 
     // TODO: TO TEST CORRECTLY
-    private fun transferIn(
-        hostAddress: String,
-        serverSecret: String
-    ) {
-        val requester = AndroidNeutronRequester(
-            host = hostAddress
-        )
-        val revenues = getLocalRevenuesStored()
-        if(revenues != null) {
-            requester.sendRequest(
-                request = {
-                    requester.transferIn(
-                        serverSecret = serverSecret,
-                        user = localUser.toUser(),
-                        revenues = revenues
-                    )
-                },
-                onSuccess = {
-                    localUser.profilePic = it.getString(PROFILE_PIC_KEY)
-                    transferSuccessful(
-                        storage = Online
-                    )
-                },
-                onFailure = {
-                    transferFailed(
-                        response = it
-                    )
-                }
+    private fun transferIn() {
+        if(!isHostValid(hostAddress.value))
+            hostError.value = true
+        else if(!isServerSecretValid(serverSecret.value))
+            serverSecretError.value = true
+        else {
+            val requester = AndroidNeutronRequester(
+                host = hostAddress.value
             )
+            val revenues = getLocalRevenuesStored()
+            if(revenues != null) {
+                requester.sendRequest(
+                    request = {
+                        requester.transferIn(
+                            serverSecret = serverSecret.value,
+                            user = localUser.toUser(),
+                            revenues = revenues
+                        )
+                    },
+                    onSuccess = {
+                        localUser.profilePic = it.getString(PROFILE_PIC_KEY)
+                        transferSuccessful(
+                            storage = Online
+                        )
+                    },
+                    onFailure = {
+                        transferFailed(
+                            response = it
+                        )
+                    }
+                )
+            }
         }
     }
 

@@ -72,6 +72,8 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
 
         lateinit var localUser: AndroidLocalUser
 
+        private var authWitBiometricParams: Boolean = true
+
     }
 
     /**
@@ -136,7 +138,11 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
                         )
                     }
                 }
-                LaunchBiometricAuth()
+                if(authWitBiometricParams) {
+                    authWitBiometricParams = false
+                    LaunchBiometricAuth()
+                } else
+                    checkForUpdates()
             }
         }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -179,18 +185,7 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
         }
         biometricResult?.let { result ->
             when(result) {
-                AuthenticationSuccess -> {
-                    val firstScreen = if (localUser.isAuthenticated)
-                        MainActivity::class.java
-                    else
-                        ConnectActivity::class.java
-                    requester = AndroidNeutronRequester(
-                        host = localUser.hostAddress,
-                        userId = localUser.userId,
-                        userToken = localUser.userToken
-                    )
-                    checkForUpdates(firstScreen)
-                }
+                AuthenticationSuccess -> checkForUpdates()
                 else -> {
                     NeutronTheme {
                         ErrorUI(
@@ -205,11 +200,10 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
     /**
      * Method to check if there are some update available to install
      *
-     * @param intentDestination: the intent to reach
+     * No-any params required
      */
-    private fun checkForUpdates(
-        intentDestination: Class<*>
-    ) {
+    private fun checkForUpdates() {
+        val intentDestination = getFirstScreen()
         appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
             val isUpdateAvailable = info.updateAvailability() == UPDATE_AVAILABLE
             val isUpdateSupported = info.isImmediateUpdateAllowed
@@ -224,6 +218,19 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
         }.addOnFailureListener {
             launchApp(intentDestination)
         }
+    }
+
+    private fun getFirstScreen() : Class<*> {
+        val firstScreen = if (localUser.isAuthenticated)
+            MainActivity::class.java
+        else
+            ConnectActivity::class.java
+        requester = AndroidNeutronRequester(
+            host = localUser.hostAddress,
+            userId = localUser.userId,
+            userToken = localUser.userToken
+        )
+        return firstScreen
     }
 
     /**

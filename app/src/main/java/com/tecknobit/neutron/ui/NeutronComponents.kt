@@ -646,12 +646,12 @@ fun NeutronTextField(
     width: Dp = 280.dp,
     value: MutableState<String>,
     isTextArea: Boolean = false,
-    validator: (() -> Boolean)? = null,
+    validator: ((String) -> Boolean)? = null,
     isError: MutableState<Boolean> = remember { mutableStateOf(false) },
     errorText: Int? = null,
     onValueChange: (String) -> Unit = {
         if (validator != null)
-            isError.value = value.value.isNotEmpty() && !validator.invoke()
+            isError.value = value.value.isNotEmpty() && !validator.invoke(it)
         value.value = it
     },
     label: Int,
@@ -688,12 +688,12 @@ fun NeutronOutlinedTextField(
     width: Dp = 300.dp,
     value: MutableState<String>,
     isTextArea: Boolean = false,
-    validator: (() -> Boolean)? = null,
+    validator: ((String) -> Boolean)? = null,
     isError: MutableState<Boolean> = remember { mutableStateOf(false) },
     errorText: Int? = null,
     onValueChange: (String) -> Unit = {
         if (validator != null)
-            isError.value = value.value.isNotEmpty() && !validator.invoke()
+            isError.value = value.value.isNotEmpty() && !validator.invoke(it)
         value.value = it
     },
     label: Int,

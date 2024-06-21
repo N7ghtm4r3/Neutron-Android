@@ -274,7 +274,7 @@ class ConnectActivity : ComponentActivity() {
                             keyboardOptions = keyboardOptions,
                             errorText = R.string.host_address_not_valid,
                             isError = viewModel.hostError,
-                            validator = { isHostValid(viewModel.host.value) }
+                            validator = { isHostValid(it) }
                         )
                         AnimatedVisibility(
                             visible = viewModel.isSignUp.value
@@ -285,7 +285,7 @@ class ConnectActivity : ComponentActivity() {
                                 keyboardOptions = keyboardOptions,
                                 errorText = R.string.server_secret_not_valid,
                                 isError = viewModel.serverSecretError,
-                                validator = { isServerSecretValid(viewModel.serverSecret.value) }
+                                validator = { isServerSecretValid(it) }
                             )
                         }
                     }
@@ -302,7 +302,7 @@ class ConnectActivity : ComponentActivity() {
                             keyboardOptions = keyboardOptions,
                             errorText = R.string.name_not_valid,
                             isError = viewModel.nameError,
-                            validator = { isNameValid(viewModel.name.value) }
+                            validator = { isNameValid(it) }
                         )
                         NeutronOutlinedTextField(
                             value = viewModel.surname,
@@ -310,7 +310,7 @@ class ConnectActivity : ComponentActivity() {
                             keyboardOptions = keyboardOptions,
                             errorText = R.string.surname_not_valid,
                             isError = viewModel.surnameError,
-                            validator = { isSurnameValid(viewModel.surname.value) }
+                            validator = { isSurnameValid(it) }
                         )
                     }
                 }
@@ -332,7 +332,7 @@ class ConnectActivity : ComponentActivity() {
                     keyboardOptions = keyboardOptions,
                     errorText = R.string.email_not_valid,
                     isError = viewModel.emailError,
-                    validator = { isEmailValid(viewModel.email.value) }
+                    validator = { isEmailValid(it) }
                 )
                 var hiddenPassword by remember { mutableStateOf(true) }
                 NeutronOutlinedTextField(
@@ -360,7 +360,7 @@ class ConnectActivity : ComponentActivity() {
                     ),
                     errorText = R.string.password_not_valid,
                     isError = viewModel.passwordError,
-                    validator = { isPasswordValid(viewModel.password.value) }
+                    validator = { isPasswordValid(it) }
                 )
                 NeutronButton(
                     modifier = Modifier

@@ -158,7 +158,7 @@ class AddTicketActivity : AddRevenueActivity() {
                     label = R.string.title,
                     errorText = R.string.title_not_valid,
                     isError = viewModel.revenueTitleError,
-                    validator = { isRevenueTitleValid(viewModel.revenueTitle.value) }
+                    validator = { isRevenueTitleValid(it) }
                 )
                 NeutronTextField(
                     modifier = Modifier
@@ -171,7 +171,7 @@ class AddTicketActivity : AddRevenueActivity() {
                     isTextArea = true,
                     errorText = R.string.description_not_valid,
                     isError = viewModel.revenueDescriptionError,
-                    validator = { isRevenueDescriptionValid(viewModel.revenueDescription.value) }
+                    validator = { isRevenueDescriptionValid(it) }
                 )
                 TimeInfoSection(
                     dateTitle = R.string.opening_date_title,
