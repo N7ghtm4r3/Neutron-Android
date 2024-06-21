@@ -92,7 +92,7 @@ class ConnectActivityViewModel(
                         launchApp(
                             name = name.value,
                             surname = surname.value,
-                            language = response.getString(LANGUAGE_KEY),
+                            language = language,
                             response = response
                         )
                     },
@@ -207,6 +207,7 @@ class ConnectActivityViewModel(
             name,
             surname,
             email.value,
+            password.value,
             language,
             response
         )

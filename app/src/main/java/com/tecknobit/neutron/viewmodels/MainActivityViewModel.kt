@@ -18,20 +18,24 @@ class MainActivityViewModel(
     val revenues: LiveData<MutableList<Revenue>> = _revenues
 
     fun getRevenuesList() {
-        execRefreshingRoutine(
-            currentContext = MainActivity::class.java,
-            routine = {
-                requester.sendRequest(
-                    request = {
-                        requester.listRevenues()
-                    },
-                    onSuccess = { helper ->
-                        _revenues.postValue(returnRevenues(helper.getJSONArray(RESPONSE_MESSAGE_KEY)))
-                    },
-                    onFailure = { showSnack(it) }
-                )
-            }
-        )
+        if(workInLocal()) {
+            // TODO: FETCH FROM LOCAL 
+        } else {
+            execRefreshingRoutine(
+                currentContext = MainActivity::class.java,
+                routine = {
+                    requester.sendRequest(
+                        request = {
+                            requester.listRevenues()
+                        },
+                        onSuccess = { helper ->
+                            _revenues.postValue(returnRevenues(helper.getJSONArray(RESPONSE_MESSAGE_KEY)))
+                        },
+                        onFailure = { showSnack(it) }
+                    )
+                }
+            )
+        }
     }
 
 }

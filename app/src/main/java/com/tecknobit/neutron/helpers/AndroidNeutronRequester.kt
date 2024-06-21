@@ -27,8 +27,8 @@ import javax.net.ssl.X509TrustManager
 
 class AndroidNeutronRequester(
     host: String,
-    userId: String?,
-    userToken: String?
+    userId: String? = null,
+    userToken: String? = null
 ) : NeutronRequester(
     host = host,
     userId = userId,

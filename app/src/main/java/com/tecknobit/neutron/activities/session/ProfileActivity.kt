@@ -105,7 +105,6 @@ import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
 import com.tecknobit.neutroncore.records.User.NeutronCurrency
 import com.tecknobit.neutroncore.records.User.UserStorage.Local
-import com.tecknobit.neutroncore.records.User.UserStorage.Online
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileOutputStream
@@ -735,27 +734,30 @@ class ProfileActivity : NeutronActivity() {
     ) {
         val hostAddress = remember { mutableStateOf("") }
         val serverSecret = remember { mutableStateOf("") }
-        var isExecuting by remember { mutableStateOf(false) }
-        val waiting = remember { mutableStateOf(true) }
-        val success = remember { mutableStateOf(false) }
+        viewModel.isExecuting = remember { mutableStateOf(false) }
+        viewModel.waiting = remember { mutableStateOf(true) }
+        viewModel.success = remember { mutableStateOf(false) }
         val executeRequest = {
-            isExecuting = true
-            waiting.value = true
-            success.value = false
-            // TODO: MAKE THE REQUEST THEN
+            viewModel.isExecuting.value = true
+            viewModel.waiting.value = true
+            viewModel.success.value = false
+            viewModel.changeStorage(
+                hostAddress = hostAddress.value,
+                serverSecret = serverSecret.value
+            )
         }
         val resetLayout = {
-            isExecuting = false
+            viewModel.isExecuting.value = false
             hostAddress.value = ""
             serverSecret.value = ""
             changeStorage.value = false
-            waiting.value = true
-            success.value = false
+            viewModel.waiting.value = true
+            viewModel.success.value = false
         }
         ChangeInfo(
             showModal = changeStorage,
             sheetState = rememberModalBottomSheetState(
-                confirmValueChange = { !isExecuting || success.value }
+                confirmValueChange = { !viewModel.isExecuting.value || viewModel.success.value }
             ),
             onDismissRequest = { resetLayout.invoke() }
         ) {
@@ -767,7 +769,7 @@ class ProfileActivity : NeutronActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                if(!isExecuting) {
+                if(!viewModel.isExecuting.value) {
                     val awareText = stringResource(
                         if(currentStorageIsLocal)
                             R.string.aware_server_message
@@ -801,18 +803,10 @@ class ProfileActivity : NeutronActivity() {
                         )
                     }
                 } else {
-                    // TODO: TO REMOVE
-                    LaunchedEffect(key1 = waiting.value){
-                        delay(3000L)
-                        waiting.value = false
-                        // TODO: TO REMOVE GET FROM THE REAL REQUEST RESPONSE
-                        success.value = Random().nextBoolean()
-                        // TODO: IF success = true STORE DATA
-                    }
                     ResponseStatusUI(
-                        isWaiting = waiting,
+                        isWaiting = viewModel.waiting,
                         statusText = R.string.transferring_data,
-                        isSuccessful = success,
+                        isSuccessful = viewModel.success,
                         successText = R.string.transfer_executed_successfully,
                         failedText = R.string.transfer_failed
                     )
@@ -823,13 +817,13 @@ class ProfileActivity : NeutronActivity() {
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.End
                 ) {
-                    if(!isExecuting) {
+                    if(!viewModel.isExecuting.value) {
                         TextButton(
                             onClick = { resetLayout.invoke() }
                         ) {
                             Text(
                                 text = stringResource(
-                                    if(isExecuting)
+                                    if(viewModel.isExecuting.value)
                                         R.string.cancel
                                     else
                                         R.string.dismiss
@@ -846,17 +840,12 @@ class ProfileActivity : NeutronActivity() {
                     } else {
                         TextButton(
                             onClick = {
-                                if(waiting.value) {
-                                    // TODO: STOP THE TRANSFER THEN
-                                    isExecuting = false
-                                } else {
-                                    if(success.value) {
+                                if(viewModel.waiting.value)
+                                    viewModel.isExecuting.value = false
+                                else {
+                                    if(viewModel.success.value) {
                                         resetLayout.invoke()
                                         changeStorage.value = false
-                                        localUser.storage = if (currentStorageIsLocal)
-                                            Online
-                                        else
-                                            Local
                                         navToSplash()
                                     } else
                                         executeRequest.invoke()
@@ -865,10 +854,10 @@ class ProfileActivity : NeutronActivity() {
                         ) {
                             Text(
                                 text = stringResource(
-                                    if(waiting.value)
+                                    if(viewModel.waiting.value)
                                         R.string.cancel
                                     else {
-                                        if(success.value)
+                                        if(viewModel.success.value)
                                             R.string.close
                                         else
                                             R.string.retry

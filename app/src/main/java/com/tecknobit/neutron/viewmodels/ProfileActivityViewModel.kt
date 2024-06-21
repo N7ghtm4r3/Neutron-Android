@@ -2,12 +2,18 @@ package com.tecknobit.neutron.viewmodels
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
+import com.tecknobit.apimanager.formatters.JsonHelper
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
+import com.tecknobit.neutron.helpers.AndroidNeutronRequester
 import com.tecknobit.neutroncore.helpers.InputValidator.isEmailValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.NeutronCurrency
 import com.tecknobit.neutroncore.records.User.PROFILE_PIC_KEY
+import com.tecknobit.neutroncore.records.User.UserStorage
+import com.tecknobit.neutroncore.records.User.UserStorage.Local
+import com.tecknobit.neutroncore.records.User.UserStorage.Online
+import com.tecknobit.neutroncore.records.revenues.Revenue
 import java.io.File
 
 class ProfileActivityViewModel(
@@ -24,6 +30,12 @@ class ProfileActivityViewModel(
 
     lateinit var newPasswordError: MutableState<Boolean>
 
+    lateinit var isExecuting: MutableState<Boolean>
+
+    lateinit var waiting: MutableState<Boolean>
+
+    lateinit var success: MutableState<Boolean>
+
     fun changeProfilePic(
         imagePath: String,
         profilePic: MutableState<String>
@@ -39,6 +51,7 @@ class ProfileActivityViewModel(
                 },
                 onSuccess = {
                     profilePic.value = imagePath
+                    localUser.setLocalProfilePicPath(imagePath)
                     localUser.profilePic = it.getString(PROFILE_PIC_KEY)
                 },
                 onFailure = { showSnack(it) }
@@ -143,8 +156,98 @@ class ProfileActivityViewModel(
         onChange.invoke()
     }
 
-    fun changeStorage() {
-        // TODO: MAKE THE REAL WORKFLOW
+    fun changeStorage(
+        hostAddress: String,
+        serverSecret: String
+    ) {
+        success.value = false
+        if(workInLocal()) {
+            transferIn(
+                hostAddress = hostAddress,
+                serverSecret = serverSecret
+            )
+        } else
+            transferOut()
+    }
+
+    // TODO: TO TEST CORRECTLY
+    private fun transferIn(
+        hostAddress: String,
+        serverSecret: String
+    ) {
+        val requester = AndroidNeutronRequester(
+            host = hostAddress
+        )
+        val revenues = getLocalRevenuesStored()
+        if(revenues != null) {
+            requester.sendRequest(
+                request = {
+                    requester.transferIn(
+                        serverSecret = serverSecret,
+                        user = localUser.toUser(),
+                        revenues = revenues
+                    )
+                },
+                onSuccess = {
+                    localUser.profilePic = it.getString(PROFILE_PIC_KEY)
+                    transferSuccessful(
+                        storage = Online
+                    )
+                },
+                onFailure = {
+                    transferFailed(
+                        response = it
+                    )
+                }
+            )
+        }
+    }
+
+    private fun getLocalRevenuesStored() : List<Revenue>? {
+        // TODO: FETCH FROM THE LOCAL DATABASE THEN
+        
+        // TODO: INSERT IN THE LOOP
+        if(!isExecuting.value)
+            return null
+        
+        return emptyList()
+    }
+
+    private fun transferOut() {
+        requester.sendRequest(
+            request = { requester.transferOut() },
+            onSuccess = {
+                // TODO: SAVE REVENUES IN LOCAL
+                requester.setUserCredentials(
+                    userId = null,
+                    userToken = null
+                )
+                localUser.profilePic = null
+                transferSuccessful(
+                    storage = Local
+                )
+            },
+            onFailure = {
+                transferFailed(
+                    response = it
+                )
+            }
+        )
+    }
+
+    private fun transferSuccessful(
+        storage: UserStorage
+    ) {
+        localUser.storage = storage
+        waiting.value = false
+        success.value = true
+    }
+
+    private fun transferFailed(
+        response: JsonHelper
+    ) {
+        waiting.value = false
+        showSnack(response)
     }
 
     fun deleteAccount(
