@@ -6,16 +6,12 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,11 +35,9 @@ import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.MainActivity.Companion.revenues
 import com.tecknobit.neutron.activities.session.addactivities.AddTicketActivity
-import com.tecknobit.neutron.ui.EmptyListUI
+import com.tecknobit.neutron.ui.DisplayTickets
 import com.tecknobit.neutron.ui.ErrorUI
-import com.tecknobit.neutron.ui.GeneralRevenue
 import com.tecknobit.neutron.ui.NeutronAlertDialog
-import com.tecknobit.neutron.ui.SwipeToDeleteContainer
 import com.tecknobit.neutron.ui.getProjectRevenue
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.displayFontFamily
@@ -145,50 +139,19 @@ class ProjectRevenueActivity : NeutronActivity() {
                                 )
                             },
                             uiContent = {
-                                val tickets = projectRevenue.value!!.tickets.toMutableList()
-                                if(tickets.isNotEmpty()) {
-                                    LazyColumn {
-                                        item {
-                                            GeneralRevenue(
-                                                revenue = projectRevenue.value!!.initialRevenue
-                                            )
-                                        }
-                                        items(
-                                            key = { ticket -> ticket.id },
-                                            items = tickets
-                                        ) { ticket ->
-                                            SwipeToDeleteContainer(
-                                                item = ticket,
-                                                onRight = if(!ticket.isClosed) {
-                                                    {
-                                                        viewModel.closeTicket(
-                                                            ticket = ticket
-                                                        )
-                                                    }
-                                                } else
-                                                    null,
-                                                onDelete = {
-                                                    viewModel.deleteTicket(
-                                                        ticket = ticket
-                                                    )
-                                                }
-                                            ) {
-                                                GeneralRevenue(
-                                                    revenue = ticket
-                                                )
-                                            }
-                                            HorizontalDivider()
-                                        }
+                                DisplayTickets(
+                                    projectRevenue = projectRevenue.value!!,
+                                    onRight = { ticket ->
+                                        viewModel.closeTicket(
+                                            ticket = ticket
+                                        )
+                                    },
+                                    onDelete = { ticket ->
+                                        viewModel.deleteTicket(
+                                            ticket = ticket
+                                        )
                                     }
-                                } else {
-                                    GeneralRevenue(
-                                        revenue = projectRevenue.value!!.initialRevenue
-                                    )
-                                    EmptyListUI(
-                                        icon = Icons.AutoMirrored.Filled.StickyNote2,
-                                        subText = R.string.no_tickets_yet
-                                    )
-                                }
+                                )
                             }
                         )
                     }

@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
@@ -71,6 +72,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -463,6 +465,54 @@ fun InsertionLabelBadge(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun DisplayTickets(
+    projectRevenue: ProjectRevenue,
+    onRight: (TicketRevenue) -> Unit,
+    onDelete: (TicketRevenue) -> Unit
+) {
+    val tickets = projectRevenue.tickets.toMutableStateList()
+    if (tickets.isNotEmpty()) {
+        LazyColumn {
+            item {
+                GeneralRevenue(
+                    revenue = projectRevenue.initialRevenue
+                )
+            }
+            items(
+                key = { ticket -> ticket.id },
+                items = tickets
+            ) { ticket ->
+                SwipeToDeleteContainer(
+                    item = ticket,
+                    onRight = if (!ticket.isClosed) {
+                        {
+                            onRight.invoke(ticket)
+                        }
+                    } else
+                        null,
+                    onDelete = {
+                        onDelete.invoke(ticket)
+                    }
+                ) {
+                    GeneralRevenue(
+                        revenue = ticket
+                    )
+                }
+                HorizontalDivider()
+            }
+        }
+    } else {
+        GeneralRevenue(
+            revenue = projectRevenue.initialRevenue
+        )
+        EmptyListUI(
+            icon = Icons.AutoMirrored.Filled.StickyNote2,
+            subText = R.string.no_tickets_yet
+        )
     }
 }
 

@@ -59,7 +59,7 @@ class ProjectRevenueActivityViewModel(
         requester.sendRequest(
             request = {
                 requester.closeProjectRevenueTicket(
-                    projectRevenue = projectRevenue.value!!,
+                    projectRevenue = _projectRevenue.value!!,
                     ticket = ticket
                 )
             },
@@ -79,7 +79,7 @@ class ProjectRevenueActivityViewModel(
         requester.sendRequest(
             request = {
                 requester.deleteProjectRevenueTicket(
-                    projectRevenue = projectRevenue.value!!,
+                    projectRevenue = _projectRevenue.value!!,
                     ticket = ticket
                 )
             },

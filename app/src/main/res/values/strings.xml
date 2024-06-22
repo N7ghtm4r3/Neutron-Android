@@ -79,7 +79,7 @@
     <string name="execute">Execute</string>
     <string name="transferring_data">Transferring data…</string>
     <string name="transfer_executed_successfully">Transfer executed successfully!</string>
-    <string name="transfer_failed">Transfer failed...</string>
+    <string name="transfer_failed">Transfer failed…</string>
     <string name="retry">Retry</string>
     <string name="no_revenues_yet">No revenues yet</string>
     <string name="no_tickets_yet">No tickets yet</string>
