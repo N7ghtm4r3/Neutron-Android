@@ -5,10 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.tecknobit.apimanager.formatters.TimeFormatter
 import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
-import com.tecknobit.equinox.Requester.Companion.RESPONSE_MESSAGE_KEY
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutroncore.records.User.CURRENCY_KEY
+import com.tecknobit.neutroncore.records.User.NeutronCurrency
+import com.tecknobit.neutroncore.records.User.PROFILE_PIC_KEY
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.Revenue
+import com.tecknobit.neutroncore.records.revenues.Revenue.REVENUES_KEY
 import com.tecknobit.neutroncore.records.revenues.Revenue.returnRevenues
 import java.time.YearMonth
 
@@ -41,7 +45,10 @@ class MainActivityViewModel(
                             requester.listRevenues()
                         },
                         onSuccess = { helper ->
-                            _revenues.postValue(returnRevenues(helper.getJSONArray(RESPONSE_MESSAGE_KEY)))
+                            _revenues.postValue(returnRevenues(helper.getJSONArray(REVENUES_KEY)))
+                            localUser.currency =
+                                NeutronCurrency.valueOf(helper.getString(CURRENCY_KEY))
+                            localUser.profilePic = helper.getString(PROFILE_PIC_KEY)
                             getWalletBalance()
                             getWalletTrend()
                         },
