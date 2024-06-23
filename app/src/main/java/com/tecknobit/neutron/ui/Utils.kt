@@ -8,14 +8,6 @@ fun String.backgroundColor(): Color {
     return Color(("ff" + removePrefix("#").lowercase()).toLong(16))
 }
 
-fun List<Revenue>.getWalletBalance(): Double {
-    var balance = 0.0
-    forEach { revenue ->
-        balance += revenue.value
-    }
-    return balance
-}
-
 fun List<Revenue>.getProjectRevenue(
     revenueId: String
 ): ProjectRevenue? {

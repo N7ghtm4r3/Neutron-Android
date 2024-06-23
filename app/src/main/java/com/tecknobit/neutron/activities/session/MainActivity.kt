@@ -21,10 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,13 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.addactivities.AddRevenuesActivity
 import com.tecknobit.neutron.ui.DisplayRevenues
-import com.tecknobit.neutron.ui.getWalletBalance
 import com.tecknobit.neutron.ui.theme.NeutronTheme
 import com.tecknobit.neutron.ui.theme.bodyFontFamily
 import com.tecknobit.neutron.ui.theme.displayFontFamily
@@ -67,7 +62,8 @@ class MainActivity : NeutronActivity() {
         setContent {
             viewModel.getRevenuesList()
             revenues = viewModel.revenues.observeAsState()
-            val walletTrendPercent by remember { mutableDoubleStateOf(1.0) }
+            val walletBalance = viewModel.walletBalance.observeAsState()
+            val walletTrend = viewModel.walletTrend.observeAsState()
             NeutronTheme {
                 Scaffold (
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -106,14 +102,13 @@ class MainActivity : NeutronActivity() {
                                         verticalArrangement = Arrangement.spacedBy(5.dp)
                                     ) {
                                         Text(
-                                            text = "${revenues.value!!.getWalletBalance()}" +
-                                                    localUser.currency.symbol,
+                                            text = "${walletBalance.value}${localUser.currency.symbol}",
                                             fontFamily = bodyFontFamily,
                                             fontSize = 35.sp,
                                             color = Color.White
                                         )
                                         Text(
-                                            text = "${textualizeAssetPercent(walletTrendPercent)}/"
+                                            text = "${walletTrend.value}/"
                                                     + stringResource(R.string.last_month),
                                             fontFamily = bodyFontFamily,
                                             color = Color.White
