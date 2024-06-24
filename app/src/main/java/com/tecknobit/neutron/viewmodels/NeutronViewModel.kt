@@ -25,7 +25,7 @@ open class NeutronViewModel(
 
     }
 
-    protected val refreshRoutine = CoroutineScope(Dispatchers.Default)
+    private val refreshRoutine = CoroutineScope(Dispatchers.Default)
 
     private val fetcherManager = FetcherManager(refreshRoutine)
 

@@ -6,6 +6,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.text.intl.Locale.Companion.current
 import com.tecknobit.apimanager.formatters.JsonHelper
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.androidLocalServer
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutroncore.helpers.Endpoints.BASE_ENDPOINT
@@ -69,13 +70,13 @@ class ConnectActivityViewModel(
 
     private fun signUp() {
         if (signUpFormIsValid()) {
+            val currentLanguageTag = current.toLanguageTag().substringBefore("-")
+            var language = LANGUAGES_SUPPORTED[currentLanguageTag]
+            language = if (language == null)
+                DEFAULT_LANGUAGE
+            else
+                currentLanguageTag
             if (storeDataOnline.value) {
-                val currentLanguageTag = current.toLanguageTag().substringBefore("-")
-                var language = LANGUAGES_SUPPORTED[currentLanguageTag]
-                language = if (language == null)
-                    DEFAULT_LANGUAGE
-                else
-                    currentLanguageTag
                 requester.changeHost(host.value + BASE_ENDPOINT)
                 requester.sendRequest(
                     request = {
@@ -89,7 +90,7 @@ class ConnectActivityViewModel(
                         )
                     },
                     onSuccess = { response ->
-                        launchApp(
+                        setRequesterAndLaunchApp(
                             name = name.value,
                             surname = surname.value,
                             language = language,
@@ -99,7 +100,22 @@ class ConnectActivityViewModel(
                     onFailure = { showSnack(it) }
                 )
             } else {
-                // TODO: LOCAL SIGN UP
+                androidLocalServer.signUp(
+                    name.value,
+                    surname.value,
+                    email.value,
+                    password.value,
+                    language = language,
+                    onSuccess = { response ->
+                        launchApp(
+                            response = response,
+                            name.value,
+                            surname.value,
+                            language = language
+                        )
+                    },
+                    onFailure = { showSnack(it) }
+                )
             }
         }
     }
@@ -155,7 +171,7 @@ class ConnectActivityViewModel(
                         )
                     },
                     onSuccess = { response ->
-                        launchApp(
+                        setRequesterAndLaunchApp(
                             name = response.getString(NAME_KEY),
                             surname = response.getString(SURNAME_KEY),
                             language = response.getString(LANGUAGE_KEY),
@@ -166,6 +182,7 @@ class ConnectActivityViewModel(
                 )
             } else {
                 // TODO: EXECUTE THE LOCAL SIGN IN
+
             }
         }
     }
@@ -192,7 +209,7 @@ class ConnectActivityViewModel(
         return true
     }
 
-    private fun launchApp(
+    private fun setRequesterAndLaunchApp(
         response: JsonHelper,
         name: String,
         surname: String,
@@ -202,8 +219,22 @@ class ConnectActivityViewModel(
             userId = response.getString(IDENTIFIER_KEY),
             userToken = response.getString(TOKEN_KEY)
         )
+        launchApp(
+            response = response,
+            name = name,
+            surname = surname,
+            language = language
+        )
+    }
+
+    private fun launchApp(
+        response: JsonHelper,
+        name: String,
+        surname: String,
+        language: String
+    ) {
         localUser.insertNewUser(
-            host.value,
+            host.value.ifEmpty { null },
             name,
             surname,
             email.value,

@@ -45,11 +45,12 @@ import com.google.android.play.core.ktx.isImmediateUpdateAllowed
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.auth.ConnectActivity
 import com.tecknobit.neutron.activities.session.MainActivity
-import com.tecknobit.neutron.helpers.AndroidLocalUser
 import com.tecknobit.neutron.helpers.AndroidNeutronRequester
 import com.tecknobit.neutron.helpers.BiometricPromptManager
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationNotSet
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationSuccess
+import com.tecknobit.neutron.helpers.local.AndroidLocalUser
+import com.tecknobit.neutron.helpers.local.storage.AndroidLocalServer
 import com.tecknobit.neutron.ui.ErrorUI
 import com.tecknobit.neutron.ui.PROJECT_LABEL
 import com.tecknobit.neutron.ui.theme.AppTypography
@@ -74,6 +75,8 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
     companion object {
 
         lateinit var localUser: AndroidLocalUser
+
+        lateinit var androidLocalServer: AndroidLocalServer
 
         private var authWitBiometricParams: Boolean = true
 
@@ -225,15 +228,26 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
     }
 
     private fun getFirstScreen() : Class<*> {
-        val firstScreen = if (localUser.isAuthenticated)
+        val isAuthenticated = localUser.isAuthenticated
+        val userId = localUser.userId
+        val token = localUser.userToken
+        val firstScreen = if (isAuthenticated)
             MainActivity::class.java
         else
             ConnectActivity::class.java
-        requester = AndroidNeutronRequester(
-            host = localUser.hostAddress,
-            userId = localUser.userId,
-            userToken = localUser.userToken
-        )
+        if (localUser.hasLocalStorageSet()) {
+            androidLocalServer = AndroidLocalServer(
+                this@Splashscreen,
+                userId,
+                token
+            )
+        } else {
+            requester = AndroidNeutronRequester(
+                host = localUser.hostAddress,
+                userId = userId,
+                userToken = token
+            )
+        }
         return firstScreen
     }
 
