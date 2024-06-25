@@ -6,11 +6,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.text.intl.Locale.Companion.current
 import com.tecknobit.apimanager.formatters.JsonHelper
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.androidLocalServer
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutron.helpers.AndroidNeutronRequester
-import com.tecknobit.neutron.helpers.local.storage.AndroidLocalServer
 import com.tecknobit.neutroncore.helpers.Endpoints.BASE_ENDPOINT
 import com.tecknobit.neutroncore.helpers.InputValidator.DEFAULT_LANGUAGE
 import com.tecknobit.neutroncore.helpers.InputValidator.LANGUAGES_SUPPORTED
@@ -34,10 +32,6 @@ class ConnectActivityViewModel(
 ) {
 
     lateinit var isSignUp: MutableState<Boolean>
-
-    lateinit var storeDataOnline: MutableState<Boolean>
-
-    lateinit var showQrCodeLogin: MutableState<Boolean>
 
     lateinit var host: MutableState<String>
 
@@ -78,66 +72,41 @@ class ConnectActivityViewModel(
                 DEFAULT_LANGUAGE
             else
                 currentLanguageTag
-            if (storeDataOnline.value) {
-                instantiateRequester()
-                requester.sendRequest(
-                    request = {
-                        requester.signUp(
-                            serverSecret = serverSecret.value,
-                            name = name.value,
-                            surname = surname.value,
-                            email = email.value,
-                            password = password.value,
-                            language = language
-                        )
-                    },
-                    onSuccess = { response ->
-                        setRequesterAndLaunchApp(
-                            name = name.value,
-                            surname = surname.value,
-                            language = language,
-                            response = response
-                        )
-                    },
-                    onFailure = { showSnack(it) }
-                )
-            } else {
-                instantiateLocalServer()
-                androidLocalServer.signUp(
-                    name.value,
-                    surname.value,
-                    email.value,
-                    password.value,
-                    language = language,
-                    onSuccess = { response ->
-                        launchApp(
-                            response = response,
-                            name = name.value,
-                            surname = surname.value,
-                            language = language
-                        )
-                    },
-                    onFailure = { showSnack(it) }
-                )
-            }
+            requester.changeHost(host.value + BASE_ENDPOINT)
+            requester.sendRequest(
+                request = {
+                    requester.signUp(
+                        serverSecret = serverSecret.value,
+                        name = name.value,
+                        surname = surname.value,
+                        email = email.value,
+                        password = password.value,
+                        language = language
+                    )
+                },
+                onSuccess = { response ->
+                    launchApp(
+                        name = name.value,
+                        surname = surname.value,
+                        language = language,
+                        response = response
+                    )
+                },
+                onFailure = { showSnack(it) }
+            )
         }
     }
 
     private fun signUpFormIsValid(): Boolean {
-        var isValid: Boolean
-        if (storeDataOnline.value) {
-            isValid = isHostValid(host.value)
-            if (!isValid) {
-                hostError.value = true
-                return false
-            }
+        var isValid: Boolean = isHostValid(host.value)
+        if (!isValid) {
+            hostError.value = true
+            return false
         }
-        if (storeDataOnline.value) {
-            isValid = isServerSecretValid(serverSecret.value)
-            if (!isValid) {
-                serverSecretError.value = true
-                return false
-            }
+        isValid = isServerSecretValid(serverSecret.value)
+        if (!isValid) {
+            serverSecretError.value = true
+            return false
         }
         isValid = isNameValid(name.value)
         if (!isValid) {
@@ -164,52 +133,32 @@ class ConnectActivityViewModel(
 
     private fun signIn() {
         if (signInFormIsValid()) {
-            if (storeDataOnline.value) {
-                instantiateRequester()
-                requester.sendRequest(
-                    request = {
-                        requester.signIn(
-                            email = email.value,
-                            password = password.value
-                        )
-                    },
-                    onSuccess = { response ->
-                        setRequesterAndLaunchApp(
-                            name = response.getString(NAME_KEY),
-                            surname = response.getString(SURNAME_KEY),
-                            language = response.getString(LANGUAGE_KEY),
-                            response = response
-                        )
-                    },
-                    onFailure = { showSnack(it) }
-                )
-            } else {
-                instantiateLocalServer()
-                androidLocalServer.signIn(
-                    email.value,
-                    password.value,
-                    onSuccess = { response ->
-                        launchApp(
-                            response = response,
-                            name = response.getString(NAME_KEY),
-                            surname = response.getString(SURNAME_KEY),
-                            language = response.getString(LANGUAGE_KEY)
-                        )
-                    },
-                    onFailure = { showSnack(it) }
-                )
-            }
+            requester.changeHost(host.value + BASE_ENDPOINT)
+            requester.sendRequest(
+                request = {
+                    requester.signIn(
+                        email = email.value,
+                        password = password.value
+                    )
+                },
+                onSuccess = { response ->
+                    launchApp(
+                        name = response.getString(NAME_KEY),
+                        surname = response.getString(SURNAME_KEY),
+                        language = response.getString(LANGUAGE_KEY),
+                        response = response
+                    )
+                },
+                onFailure = { showSnack(it) }
+            )
         }
     }
 
     private fun signInFormIsValid(): Boolean {
-        var isValid: Boolean
-        if (storeDataOnline.value) {
-            isValid = isHostValid(host.value)
-            if (!isValid) {
-                hostError.value = true
-                return false
-            }
+        var isValid: Boolean = isHostValid(host.value)
+        if (!isValid) {
+            hostError.value = true
+            return false
         }
         isValid = isEmailValid(email.value)
         if (!isValid) {
@@ -224,7 +173,7 @@ class ConnectActivityViewModel(
         return true
     }
 
-    private fun setRequesterAndLaunchApp(
+    private fun launchApp(
         response: JsonHelper,
         name: String,
         surname: String,
@@ -234,20 +183,6 @@ class ConnectActivityViewModel(
             userId = response.getString(IDENTIFIER_KEY),
             userToken = response.getString(TOKEN_KEY)
         )
-        launchApp(
-            response = response,
-            name = name,
-            surname = surname,
-            language = language
-        )
-    }
-
-    private fun launchApp(
-        response: JsonHelper,
-        name: String,
-        surname: String,
-        language: String
-    ) {
         localUser.insertNewUser(
             host.value.ifEmpty { null },
             name,
@@ -263,14 +198,6 @@ class ConnectActivityViewModel(
     private fun instantiateRequester() {
         requester = AndroidNeutronRequester(
             host = host.value + BASE_ENDPOINT
-        )
-    }
-
-    private fun instantiateLocalServer() {
-        androidLocalServer = AndroidLocalServer(
-            context = context,
-            userId = null,
-            userToken = null
         )
     }
 

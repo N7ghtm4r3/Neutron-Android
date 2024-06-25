@@ -45,53 +45,45 @@ class AddRevenuesViewModel(
     private fun createProjectRevenue(
         onSuccess: () -> Unit
     ) {
-        if (workInLocal()) {
-            // TODO: ADD IN LOCAL DATABASE
-        } else {
-            requester.sendRequest(
-                request = {
-                    requester.createProjectRevenue(
-                        title = revenueTitle.value,
-                        value = revenueValue.value.toDouble(),
-                        revenueDate = completeRevenueDate(
-                            date = currentDate,
-                            time = currentTime
-                        )
+        requester.sendRequest(
+            request = {
+                requester.createProjectRevenue(
+                    title = revenueTitle.value,
+                    value = revenueValue.value.toDouble(),
+                    revenueDate = completeRevenueDate(
+                        date = currentDate,
+                        time = currentTime
                     )
-                },
-                onSuccess = {
-                    onSuccess.invoke()
-                },
-                onFailure = { showSnack(it) }
-            )
-        }
+                )
+            },
+            onSuccess = {
+                onSuccess.invoke()
+            },
+            onFailure = { showSnack(it) }
+        )
     }
 
     private fun createGeneralRevenue(
         onSuccess: () -> Unit
     ) {
-        if (workInLocal()) {
-            // TODO: ADD IN LOCAL DATABASE
-        } else {
-            requester.sendRequest(
-                request = {
-                    requester.createGeneralRevenue(
-                        title = revenueTitle.value,
-                        description = revenueDescription.value,
-                        value = revenueValue.value.toDouble(),
-                        revenueDate = completeRevenueDate(
-                            date = currentDate,
-                            time = currentTime
-                        ),
-                        labels = labels.toList()
-                    )
-                },
-                onSuccess = {
-                    onSuccess.invoke()
-                },
-                onFailure = { showSnack(it) }
-            )
-        }
+        requester.sendRequest(
+            request = {
+                requester.createGeneralRevenue(
+                    title = revenueTitle.value,
+                    description = revenueDescription.value,
+                    value = revenueValue.value.toDouble(),
+                    revenueDate = completeRevenueDate(
+                        date = currentDate,
+                        time = currentTime
+                    ),
+                    labels = labels.toList()
+                )
+            },
+            onSuccess = {
+                onSuccess.invoke()
+            },
+            onFailure = { showSnack(it) }
+        )
     }
 
 }

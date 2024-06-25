@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -40,10 +38,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material.icons.filled.Lan
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -61,10 +57,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,17 +70,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanOptions
 import com.tecknobit.neutron.R
 import com.tecknobit.neutron.activities.NeutronActivity
 import com.tecknobit.neutron.activities.navigation.Splashscreen
@@ -99,53 +89,28 @@ import com.tecknobit.neutron.ui.theme.errorLight
 import com.tecknobit.neutron.viewmodels.ProfileActivityViewModel
 import com.tecknobit.neutroncore.helpers.InputValidator.LANGUAGES_SUPPORTED
 import com.tecknobit.neutroncore.helpers.InputValidator.isEmailValid
-import com.tecknobit.neutroncore.helpers.InputValidator.isHostValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
-import com.tecknobit.neutroncore.helpers.InputValidator.isServerSecretValid
 import com.tecknobit.neutroncore.records.User.ApplicationTheme
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Dark
 import com.tecknobit.neutroncore.records.User.ApplicationTheme.Light
 import com.tecknobit.neutroncore.records.User.NeutronCurrency
-import com.tecknobit.neutroncore.records.User.UserStorage.Local
-import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.util.Random
 import kotlin.math.min
 
 class ProfileActivity : NeutronActivity() {
 
     private lateinit var theme: MutableState<ApplicationTheme>
 
-    private lateinit var hostLocalSignIn: MutableState<Boolean>
-
-    private val currentStorageIsLocal = localUser.storage == Local
-
     private val viewModel = ProfileActivityViewModel(
         snackbarHostState = snackbarHostState
     )
-
-    /**
-     * **scanOptions** ->
-     */
-    private val scanOptions = ScanOptions()
-        .setBeepEnabled(false)
-        .setOrientationLocked(false)
-
-    /**
-     * **barcodeLauncher** -> the launcher used to start the scan and use the [scanOptions]
-     */
-    private val barcodeLauncher: ActivityResultLauncher<ScanOptions> =
-        registerForActivityResult(ScanContract()) { result ->
-            // TODO: SHARE THE DATA TO THE QRCODE SCANNED
-        }
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            scanOptions.setPrompt(stringResource(R.string.qr_scanner_prompt_message))
             theme = remember { mutableStateOf(localUser.theme) }
             val profilePic = remember { mutableStateOf(localUser.profilePic) }
             val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -247,44 +212,6 @@ class ProfileActivity : NeutronActivity() {
                                                 contentDescription = null,
                                                 tint = Color.White
                                             )
-                                        }
-                                    }
-                                    if(currentStorageIsLocal) {
-                                        hostLocalSignIn = remember { mutableStateOf(false) }
-                                        HostLocalSignIn()
-                                        Column (
-                                            modifier = Modifier
-                                                .fillMaxWidth(),
-                                            horizontalAlignment = Alignment.End
-                                        ) {
-                                            Row {
-                                                IconButton(
-                                                    modifier = Modifier
-                                                        .padding(
-                                                            top = 16.dp
-                                                        ),
-                                                    onClick = { hostLocalSignIn.value = true }
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Lan,
-                                                        contentDescription = null,
-                                                        tint = Color.White
-                                                    )
-                                                }
-                                                IconButton(
-                                                    modifier = Modifier
-                                                        .padding(
-                                                            top = 16.dp
-                                                        ),
-                                                    onClick = { barcodeLauncher.launch(scanOptions) }
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.QrCodeScanner,
-                                                        contentDescription = null,
-                                                        tint = Color.White
-                                                    )
-                                                }
-                                            }
                                         }
                                     }
                                 }
@@ -430,16 +357,6 @@ class ProfileActivity : NeutronActivity() {
                             ChangeTheme(
                                 changeTheme = changeTheme
                             )
-                            val showChangeStorage = remember { mutableStateOf(false) }
-                            UserInfo(
-                                header = R.string.storage_data,
-                                info = localUser.storage.name,
-                                buttonText = R.string.change,
-                                onClick = { showChangeStorage.value = true }
-                            )
-                            ChangeStorage(
-                                changeStorage = showChangeStorage
-                            )
                             val showLogoutAlert = remember { mutableStateOf(false) }
                             UserInfo(
                                 header = R.string.disconnect,
@@ -463,76 +380,6 @@ class ProfileActivity : NeutronActivity() {
                 }
             }
         }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun HostLocalSignIn() {
-        val isListening = remember { mutableStateOf(true) }
-        // TODO: TO REMOVE GET FROM THE REAL REQUEST RESPONSE
-        val success = remember { mutableStateOf(Random().nextBoolean()) }
-        if(hostLocalSignIn.value) {
-            ModalBottomSheet(
-                sheetState = rememberModalBottomSheetState(
-                    confirmValueChange = { !isListening.value }
-                ),
-                onDismissRequest = {
-                    if(!isListening.value)
-                        hostLocalSignIn.value = false
-                }
-            ) {
-                // TODO: IMPLEMENT THE SOCKETMANAGER OR THE WRAPPER CLASS TO EXECUTE THE HOSTING AND THE DATA TRANSFER
-
-                // TODO: TO REMOVE MAKE THE REAL WORKFLOW INSTEAD
-                LaunchedEffect(
-                    key1 = true
-                ) {
-                    delay(3000L)
-                    isListening.value = false
-                }
-                Column (
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    if(isListening.value) {
-                        Text(
-                            text = stringResource(R.string.hosting_local_sign_in),
-                            fontFamily = displayFontFamily,
-                            fontSize = 20.sp
-                        )
-                    }
-                    ResponseStatusUI(
-                        isWaiting = isListening,
-                        statusText = R.string.waiting_for_the_request,
-                        isSuccessful = success,
-                        successText = R.string.sign_in_executed_successfully,
-                        failedText = R.string.sign_in_failed_message
-                    )
-                    TextButton(
-                        modifier = Modifier
-                            .align(Alignment.End),
-                        onClick = {
-                            // TODO: CLOSE THE LISTENING THEN
-                            hostLocalSignIn.value = false
-                            isListening.value = false
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(
-                                if(isListening.value)
-                                    R.string.cancel
-                                else
-                                    R.string.close
-                            )
-                        )
-                    }
-                }
-            }
-        } else
-            isListening.value = true
     }
 
     @Composable
@@ -726,157 +573,6 @@ class ProfileActivity : NeutronActivity() {
                     )
                 }
                 HorizontalDivider()
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun ChangeStorage(
-        changeStorage: MutableState<Boolean>
-    ) {
-        viewModel.hostAddress = remember { mutableStateOf("") }
-        viewModel.hostError = remember { mutableStateOf(false) }
-        viewModel.serverSecret = remember { mutableStateOf("") }
-        viewModel.serverSecretError = remember { mutableStateOf(false) }
-        viewModel.isExecuting = remember { mutableStateOf(false) }
-        viewModel.waiting = remember { mutableStateOf(true) }
-        viewModel.success = remember { mutableStateOf(false) }
-        val executeRequest = {
-            viewModel.isExecuting.value = true
-            viewModel.waiting.value = true
-            viewModel.success.value = false
-            viewModel.changeStorage()
-        }
-        val resetLayout = {
-            viewModel.isExecuting.value = false
-            viewModel.hostAddress.value = ""
-            viewModel.hostError.value = false
-            viewModel.serverSecret.value = ""
-            viewModel.serverSecretError.value = false
-            changeStorage.value = false
-            viewModel.waiting.value = true
-            viewModel.success.value = false
-        }
-        ChangeInfo(
-            showModal = changeStorage,
-            sheetState = rememberModalBottomSheetState(
-                confirmValueChange = { !viewModel.isExecuting.value || viewModel.success.value }
-            ),
-            onDismissRequest = { resetLayout.invoke() }
-        ) {
-            Column (
-                modifier = Modifier
-                    .padding(
-                        all = 16.dp
-                    ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                if(!viewModel.isExecuting.value) {
-                    val awareText = stringResource(
-                        if(currentStorageIsLocal)
-                            R.string.aware_server_message
-                        else
-                            R.string.aware_local_message
-                    )
-                    Text(
-                        text = stringResource(R.string.change_storage_location),
-                        fontFamily = displayFontFamily,
-                        fontSize = 20.sp
-                    )
-                    Text(
-                        text = awareText,
-                        textAlign = TextAlign.Justify
-                    )
-                    if(currentStorageIsLocal) {
-                        NeutronOutlinedTextField(
-                            modifier = Modifier
-                                .width(300.dp),
-                            value = viewModel.hostAddress,
-                            label = R.string.host_address,
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Next
-                            ),
-                            errorText = R.string.host_address_not_valid,
-                            isError = viewModel.hostError,
-                            validator = { isHostValid(it) }
-                        )
-                        NeutronOutlinedTextField(
-                            modifier = Modifier
-                                .width(300.dp),
-                            value = viewModel.serverSecret,
-                            label = R.string.server_secret,
-                            errorText = R.string.server_secret_not_valid,
-                            isError = viewModel.serverSecretError,
-                            validator = { isServerSecretValid(it) }
-                        )
-                    }
-                } else {
-                    ResponseStatusUI(
-                        isWaiting = viewModel.waiting,
-                        statusText = R.string.transferring_data,
-                        isSuccessful = viewModel.success,
-                        successText = R.string.transfer_executed_successfully,
-                        failedText = R.string.transfer_failed
-                    )
-                }
-                Row (
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    if(!viewModel.isExecuting.value) {
-                        TextButton(
-                            onClick = { resetLayout.invoke() }
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    if(viewModel.isExecuting.value)
-                                        R.string.cancel
-                                    else
-                                        R.string.dismiss
-                                )
-                            )
-                        }
-                        TextButton(
-                            onClick = { executeRequest.invoke() }
-                        ) {
-                            Text(
-                                text = stringResource(R.string.confirm)
-                            )
-                        }
-                    } else {
-                        TextButton(
-                            onClick = {
-                                if(viewModel.waiting.value)
-                                    viewModel.isExecuting.value = false
-                                else {
-                                    if(viewModel.success.value) {
-                                        resetLayout.invoke()
-                                        changeStorage.value = false
-                                        navToSplash()
-                                    } else
-                                        executeRequest.invoke()
-                                }
-                            }
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    if(viewModel.waiting.value)
-                                        R.string.cancel
-                                    else {
-                                        if(viewModel.success.value)
-                                            R.string.close
-                                        else
-                                            R.string.retry
-                                    }
-                                )
-                            )
-                        }
-                    }
-                }
             }
         }
     }

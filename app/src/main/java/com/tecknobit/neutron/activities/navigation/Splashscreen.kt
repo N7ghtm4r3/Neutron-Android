@@ -50,7 +50,6 @@ import com.tecknobit.neutron.helpers.BiometricPromptManager
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationNotSet
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationSuccess
 import com.tecknobit.neutron.helpers.local.AndroidLocalUser
-import com.tecknobit.neutron.helpers.local.storage.AndroidLocalServer
 import com.tecknobit.neutron.ui.ErrorUI
 import com.tecknobit.neutron.ui.PROJECT_LABEL
 import com.tecknobit.neutron.ui.theme.AppTypography
@@ -75,8 +74,6 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
     companion object {
 
         lateinit var localUser: AndroidLocalUser
-
-        lateinit var androidLocalServer: AndroidLocalServer
 
         private var authWitBiometricParams: Boolean = true
 
@@ -228,28 +225,15 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
     }
 
     private fun getFirstScreen() : Class<*> {
-        val isAuthenticated = localUser.isAuthenticated
-        val userId = localUser.userId
-        val token = localUser.userToken
-        val firstScreen = if (isAuthenticated)
+        val firstScreen = if (localUser.isAuthenticated)
             MainActivity::class.java
         else
             ConnectActivity::class.java
-        if (isAuthenticated) {
-            if (localUser.hasLocalStorageSet()) {
-                androidLocalServer = AndroidLocalServer(
-                    this@Splashscreen,
-                    userId,
-                    token
-                )
-            } else {
-                requester = AndroidNeutronRequester(
-                    host = localUser.hostAddress,
-                    userId = userId,
-                    userToken = token
-                )
-            }
-        }
+        requester = AndroidNeutronRequester(
+            host = localUser.hostAddress,
+            userId = localUser.userId,
+            userToken = localUser.userToken
+        )
         return firstScreen
     }
 

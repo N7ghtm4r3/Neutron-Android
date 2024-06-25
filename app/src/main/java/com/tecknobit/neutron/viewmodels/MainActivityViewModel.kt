@@ -3,18 +3,17 @@ package com.tecknobit.neutron.viewmodels
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.tecknobit.apimanager.formatters.JsonHelper
 import com.tecknobit.apimanager.formatters.TimeFormatter
+import com.tecknobit.apimanager.trading.TradingTools.roundValue
 import com.tecknobit.apimanager.trading.TradingTools.textualizeAssetPercent
-import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.androidLocalServer
+import com.tecknobit.equinox.Requester.Companion.RESPONSE_MESSAGE_KEY
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.MainActivity
 import com.tecknobit.neutroncore.records.User.CURRENCY_KEY
-import com.tecknobit.neutroncore.records.User.NeutronCurrency.valueOf
+import com.tecknobit.neutroncore.records.User.NeutronCurrency
 import com.tecknobit.neutroncore.records.User.PROFILE_PIC_KEY
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 import com.tecknobit.neutroncore.records.revenues.Revenue
-import com.tecknobit.neutroncore.records.revenues.Revenue.REVENUES_KEY
 import com.tecknobit.neutroncore.records.revenues.Revenue.returnRevenues
 import java.time.YearMonth
 
@@ -36,32 +35,22 @@ class MainActivityViewModel(
     val walletTrend: LiveData<String> = _walletTrend
 
     fun getRevenuesList() {
-        val successAction: (JsonHelper) -> Unit = { helper ->
-            _revenues.postValue(returnRevenues(helper.getJSONArray(REVENUES_KEY)))
-            getWalletBalance()
-            getWalletTrend()
-        }
         execRefreshingRoutine(
             currentContext = MainActivity::class.java,
             routine = {
-                if (workInLocal()) {
-                    androidLocalServer.listRevenues(
-                        onSuccess = { helper -> successAction.invoke(helper) },
-                        onFailure = { showSnack(it) }
-                    )
-                } else {
-                    requester.sendRequest(
-                        request = {
-                            requester.listRevenues()
-                        },
-                        onSuccess = { helper ->
-                            successAction.invoke(helper)
-                            localUser.currency = valueOf(helper.getString(CURRENCY_KEY))
-                            localUser.profilePic = helper.getString(PROFILE_PIC_KEY)
-                        },
-                        onFailure = { showSnack(it) }
-                    )
-                }
+                requester.sendRequest(
+                    request = {
+                        requester.listRevenues()
+                    },
+                    onSuccess = { helper ->
+                        _revenues.postValue(returnRevenues(helper.getJSONArray(RESPONSE_MESSAGE_KEY)))
+                        getWalletBalance()
+                        getWalletTrend()
+                        localUser.currency = NeutronCurrency.valueOf(helper.getString(CURRENCY_KEY))
+                        localUser.profilePic = helper.getString(PROFILE_PIC_KEY)
+                    },
+                    onFailure = { showSnack(it) }
+                )
             }
         )
     }
@@ -71,7 +60,7 @@ class MainActivityViewModel(
         _revenues.value!!.forEach { revenue ->
             balance += revenue.value
         }
-        _walletBalance.postValue(balance)
+        _walletBalance.postValue(roundValue(balance, 2))
     }
 
     private fun getWalletTrend() {

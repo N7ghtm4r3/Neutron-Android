@@ -5,7 +5,6 @@ appUpdate = "2.1.0"
 biometric = "1.1.0"
 coilCompose = "2.6.0"
 colorpickerCompose = "1.0.8"
-core = "3.5.1"
 equinox = "1.0.0"
 foundation = "1.6.8"
 kotlin = "1.9.0"
@@ -21,7 +20,6 @@ review = "2.0.1"
 reviewKtx = "2.0.1"
 runtimeLivedata = "1.6.8"
 uiTextGoogleFonts = "1.6.8"
-zxingAndroidEmbedded = "4.3.0"
 appcompat = "1.7.0"
 
 [libraries]
@@ -35,7 +33,6 @@ app-update = { module = "com.google.android.play:app-update", version.ref = "app
 app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpickerCompose" }
-core = { module = "com.google.zxing:core", version.ref = "core" }
 equinox = { module = "com.github.N7ghtm4r3:Equinox", version.ref = "equinox" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -53,7 +50,6 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 review = { module = "com.google.android.play:review", version.ref = "review" }
 review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "reviewKtx" }
-zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 [plugins]
