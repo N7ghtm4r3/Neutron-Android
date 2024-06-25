@@ -331,6 +331,7 @@ class ProfileActivity : NeutronActivity() {
                                     NeutronOutlinedTextField(
                                         value = viewModel.newEmail,
                                         label = R.string.new_email,
+                                        mustBeInLowerCase = true,
                                         errorText = R.string.email_not_valid,
                                         isError = viewModel.newEmailError,
                                         validator = { isEmailValid(it) }

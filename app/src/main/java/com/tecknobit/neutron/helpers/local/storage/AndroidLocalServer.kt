@@ -9,6 +9,12 @@ import com.tecknobit.neutroncore.helpers.local.LNeutronController.Companion.LOCA
 import com.tecknobit.neutroncore.helpers.local.LNeutronController.Companion.getFailedResponse
 import com.tecknobit.neutroncore.helpers.local.LNeutronController.Companion.getSuccessfulResponse
 import com.tecknobit.neutroncore.helpers.local.LRevenuesController
+import com.tecknobit.neutroncore.helpers.local.LRevenuesController.Companion.CREATE_GENERAL_REVENUES_TABLE
+import com.tecknobit.neutroncore.helpers.local.LRevenuesController.Companion.CREATE_INITIAL_REVENUES_TABLE
+import com.tecknobit.neutroncore.helpers.local.LRevenuesController.Companion.CREATE_PROJECT_REVENUES_TABLE
+import com.tecknobit.neutroncore.helpers.local.LRevenuesController.Companion.CREATE_REVENUE_LABELS_TABLE
+import com.tecknobit.neutroncore.helpers.local.LRevenuesController.Companion.CREATE_TICKET_REVENUES_TABLE
+import com.tecknobit.neutroncore.helpers.local.LRevenuesController.Companion.LIST_PROJECT_REVENUES_QUERY
 import com.tecknobit.neutroncore.helpers.local.LUserController
 import com.tecknobit.neutroncore.helpers.local.LUserController.Companion.CHANGE_USER_INFO_QUERY
 import com.tecknobit.neutroncore.helpers.local.LUserController.Companion.CREATE_USERS_TABLE
@@ -23,7 +29,12 @@ import com.tecknobit.neutroncore.records.User.PROFILE_PIC_KEY
 import com.tecknobit.neutroncore.records.User.SURNAME_KEY
 import com.tecknobit.neutroncore.records.User.TOKEN_KEY
 import com.tecknobit.neutroncore.records.User.USERS_KEY
+import com.tecknobit.neutroncore.records.revenues.InitialRevenue.INITIAL_REVENUES_KEY
+import com.tecknobit.neutroncore.records.revenues.ProjectRevenue.PROJECT_REVENUES_KEY
 import com.tecknobit.neutroncore.records.revenues.RevenueLabel
+import com.tecknobit.neutroncore.records.revenues.RevenueLabel.REVENUE_LABELS_KEY
+import com.tecknobit.neutroncore.records.revenues.TicketRevenue.GENERAL_REVENUES_KEY
+import com.tecknobit.neutroncore.records.revenues.TicketRevenue.TICKET_REVENUES_KEY
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -56,10 +67,20 @@ class AndroidLocalServer(
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_USERS_TABLE)
+        db.execSQL(CREATE_PROJECT_REVENUES_TABLE)
+        db.execSQL(CREATE_INITIAL_REVENUES_TABLE)
+        db.execSQL(CREATE_TICKET_REVENUES_TABLE)
+        db.execSQL(CREATE_GENERAL_REVENUES_TABLE)
+        db.execSQL(CREATE_REVENUE_LABELS_TABLE)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $USERS_KEY")
+        db.execSQL("DROP TABLE IF EXISTS $PROJECT_REVENUES_KEY")
+        db.execSQL("DROP TABLE IF EXISTS $INITIAL_REVENUES_KEY")
+        db.execSQL("DROP TABLE IF EXISTS $TICKET_REVENUES_KEY")
+        db.execSQL("DROP TABLE IF EXISTS $GENERAL_REVENUES_KEY")
+        db.execSQL("DROP TABLE IF EXISTS $REVENUE_LABELS_KEY")
         onCreate(db)
     }
 
@@ -192,17 +213,69 @@ class AndroidLocalServer(
         }
     }
 
-    override fun list(
-        userId: String,
-        userToken: String
-    ): JSONArray? {
-        TODO("Not yet implemented")
+    override fun listRevenues(
+        onSuccess: (JsonHelper) -> Unit,
+        onFailure: (JsonHelper) -> Unit
+    ) {
+        try {
+            readableDatabase.use { database ->
+                val jRevenues = JSONArray()
+                database.rawQuery(
+                    LIST_PROJECT_REVENUES_QUERY,
+                    arrayOf(
+                        userId
+                    )
+                ).use { cursor ->
+                    while (cursor.moveToNext()) {
+                        cursor.columnNames.forEach {
+                            println(it)
+                        }
+                        /*val projectId = cursor.getString(
+                            cursor.getColumnIndexOrThrow(IDENTIFIER_KEY)
+                        )
+                        val initialRevenue: InitialRevenue
+                        database.rawQuery(
+                            GET_INITIAL_REVENUE_QUERY,
+                            arrayOf(
+                                projectId
+                            )
+                        ).use { irCursor ->
+                            initialRevenue = InitialRevenue(
+                                irCursor.getString(
+                                    irCursor.getColumnIndexOrThrow(IDENTIFIER_KEY)
+                                ),
+                                irCursor.getDouble(
+                                    irCursor.getColumnIndexOrThrow(REVENUE_VALUE_KEY)
+                                ),
+                                irCursor.getLong(
+                                    irCursor.getColumnIndexOrThrow(REVENUE_DATE_KEY)
+                                )
+                            )
+                        }
+                        database.rawQuery(
+                            GET
+                        )
+                        jRevenues.put(
+                            ProjectRevenue(
+                                JSONObject()
+                                    .put()
+                            )
+                        )*/
+                    }
+                }
+                onSuccess.invoke(getSuccessfulResponse(operationExecutedSuccessfully))
+            }
+        } catch (e: Exception) {
+            onFailure.invoke(getFailedResponse(wrongProcedureMessage))
+        }
     }
 
     override fun createProjectRevenue(
         title: String,
         value: Double,
-        revenueDate: Long
+        revenueDate: Long,
+        onSuccess: (JsonHelper) -> Unit,
+        onFailure: (JsonHelper) -> Unit
     ) {
         TODO("Not yet implemented")
     }
@@ -212,13 +285,17 @@ class AndroidLocalServer(
         description: String,
         value: Double,
         revenueDate: Long,
-        labels: List<RevenueLabel?>
+        labels: List<RevenueLabel>,
+        onSuccess: (JsonHelper) -> Unit,
+        onFailure: (JsonHelper) -> Unit
     ) {
         TODO("Not yet implemented")
     }
 
     override fun getProjectRevenue(
-        revenueId: String
+        revenueId: String,
+        onSuccess: (JsonHelper) -> Unit,
+        onFailure: (JsonHelper) -> Unit
     ): JSONObject {
         TODO("Not yet implemented")
     }
@@ -229,28 +306,36 @@ class AndroidLocalServer(
         ticketValue: Double,
         ticketDescription: String,
         openingDate: Long,
-        closingDate: Long
+        closingDate: Long,
+        onSuccess: (JsonHelper) -> Unit,
+        onFailure: (JsonHelper) -> Unit
     ) {
         TODO("Not yet implemented")
     }
 
     override fun closeProjectRevenueTicket(
         revenueId: String,
-        ticketId: String
+        ticketId: String,
+        onSuccess: (JsonHelper) -> Unit,
+        onFailure: (JsonHelper) -> Unit
     ) {
         TODO("Not yet implemented")
     }
 
     override fun deleteProjectRevenueTicket(
         revenueId: String,
-        ticketId: String
+        ticketId: String,
+        onSuccess: (JsonHelper) -> Unit,
+        onFailure: (JsonHelper) -> Unit
     ) {
         TODO("Not yet implemented")
     }
 
     override fun deleteRevenue(
         table: String,
-        revenueId: String
+        revenueId: String,
+        onSuccess: (JsonHelper) -> Unit,
+        onFailure: (JsonHelper) -> Unit
     ) {
         TODO("Not yet implemented")
     }

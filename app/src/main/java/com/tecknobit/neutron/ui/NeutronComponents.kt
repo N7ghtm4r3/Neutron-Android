@@ -737,6 +737,7 @@ fun NeutronOutlinedTextField(
     modifier: Modifier = Modifier,
     width: Dp = 300.dp,
     value: MutableState<String>,
+    mustBeInLowerCase: Boolean = false,
     isTextArea: Boolean = false,
     validator: ((String) -> Boolean)? = null,
     isError: MutableState<Boolean> = remember { mutableStateOf(false) },
@@ -744,7 +745,10 @@ fun NeutronOutlinedTextField(
     onValueChange: (String) -> Unit = {
         if (validator != null)
             isError.value = value.value.isNotEmpty() && !validator.invoke(it)
-        value.value = it
+        value.value = if (mustBeInLowerCase)
+            it.lowercase()
+        else
+            it
     },
     label: Int,
     trailingIcon:  @Composable (() -> Unit)? = {

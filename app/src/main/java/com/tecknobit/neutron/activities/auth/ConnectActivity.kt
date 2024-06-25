@@ -330,6 +330,7 @@ class ConnectActivity : ComponentActivity() {
                 NeutronOutlinedTextField(
                     value = viewModel.email,
                     label = R.string.email,
+                    mustBeInLowerCase = true,
                     keyboardOptions = keyboardOptions,
                     errorText = R.string.email_not_valid,
                     isError = viewModel.emailError,
