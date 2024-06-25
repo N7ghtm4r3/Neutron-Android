@@ -3,6 +3,7 @@ package com.tecknobit.neutron.viewmodels
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
 import com.tecknobit.apimanager.formatters.JsonHelper
+import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.androidLocalServer
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.helpers.AndroidNeutronRequester
 import com.tecknobit.neutroncore.helpers.InputValidator.isEmailValid
@@ -50,8 +51,17 @@ class ProfileActivityViewModel(
         imagePath: String,
         profilePic: MutableState<String>
     ) {
+        val onSuccess: (JsonHelper) -> Unit = {
+            profilePic.value = imagePath
+            localUser.setLocalProfilePicPath(imagePath)
+            localUser.profilePic = it.getString(PROFILE_PIC_KEY)
+        }
         if (workInLocal()) {
-            // TODO: CHANGE IN LOCAL
+            androidLocalServer.changeProfilePic(
+                newProfilePic = imagePath,
+                onSuccess = onSuccess,
+                onFailure = { showSnack(it) }
+            )
         } else {
             requester.sendRequest(
                 request = {
@@ -59,22 +69,26 @@ class ProfileActivityViewModel(
                         profilePic = File(imagePath)
                     )
                 },
-                onSuccess = {
-                    profilePic.value = imagePath
-                    localUser.setLocalProfilePicPath(imagePath)
-                    localUser.profilePic = it.getString(PROFILE_PIC_KEY)
-                },
+                onSuccess = onSuccess,
                 onFailure = { showSnack(it) }
             )
         }
     }
 
     fun changeEmail(
-        onSuccess: (String) -> Unit
+        onSuccess: () -> Unit
     ) {
         if (isEmailValid(newEmail.value)) {
+            val successAction = {
+                localUser.email = newEmail.value
+                onSuccess.invoke()
+            }
             if (workInLocal()) {
-                // TODO: CHANGE IN LOCAL
+                androidLocalServer.changeEmail(
+                    newEmail = newEmail.value,
+                    onSuccess = { successAction.invoke() },
+                    onFailure = { showSnack(it) }
+                )
             } else {
                 requester.sendRequest(
                     request = {
@@ -82,10 +96,7 @@ class ProfileActivityViewModel(
                             newEmail = newEmail.value
                         )
                     },
-                    onSuccess = {
-                        localUser.email = newEmail.value
-                        onSuccess.invoke(newEmail.value)
-                    },
+                    onSuccess = { successAction.invoke() },
                     onFailure = { showSnack(it) }
                 )
             }
@@ -98,7 +109,11 @@ class ProfileActivityViewModel(
     ) {
         if (isPasswordValid(newPassword.value)) {
             if (workInLocal()) {
-                // TODO: CHANGE IN LOCAL
+                androidLocalServer.changePassword(
+                    newPassword = newPassword.value,
+                    onSuccess = { onSuccess.invoke() },
+                    onFailure = { showSnack(it) }
+                )
             } else {
                 requester.sendRequest(
                     request = {
@@ -118,8 +133,16 @@ class ProfileActivityViewModel(
         newLanguage: String,
         onSuccess: () -> Unit
     ) {
+        val successAction = {
+            localUser.language = newLanguage
+            onSuccess.invoke()
+        }
         if (workInLocal()) {
-            // TODO: CHANGE IN LOCAL
+            androidLocalServer.changeLanguage(
+                newLanguage = newLanguage,
+                onSuccess = { successAction.invoke() },
+                onFailure = { showSnack(it) }
+            )
         } else {
             requester.sendRequest(
                 request = {
@@ -127,10 +150,7 @@ class ProfileActivityViewModel(
                         newLanguage = newLanguage
                     )
                 },
-                onSuccess = {
-                    localUser.language = newLanguage
-                    onSuccess.invoke()
-                },
+                onSuccess = { successAction.invoke() },
                 onFailure = { showSnack(it) }
             )
         }
@@ -140,8 +160,16 @@ class ProfileActivityViewModel(
         newCurrency: NeutronCurrency,
         onSuccess: () -> Unit
     ) {
+        val successAction = {
+            localUser.currency = newCurrency
+            onSuccess.invoke()
+        }
         if (workInLocal()) {
-            // TODO: CHANGE IN LOCAL
+            androidLocalServer.changeCurrency(
+                newCurrency = newCurrency,
+                onSuccess = { successAction.invoke() },
+                onFailure = { showSnack(it) }
+            )
         } else {
             requester.sendRequest(
                 request = {
@@ -149,10 +177,7 @@ class ProfileActivityViewModel(
                         newCurrency = newCurrency
                     )
                 },
-                onSuccess = {
-                    localUser.currency = newCurrency
-                    onSuccess.invoke()
-                },
+                onSuccess = { successAction.invoke() },
                 onFailure = { showSnack(it) }
             )
         }
@@ -260,16 +285,20 @@ class ProfileActivityViewModel(
     fun deleteAccount(
         onDelete: () -> Unit
     ) {
+        val successAction = {
+            clearSession(
+                onClear = onDelete
+            )
+        }
         if (workInLocal()) {
-            // TODO: TO DELETE IN LOCAL
+            androidLocalServer.deleteAccount(
+                onSuccess = { successAction.invoke() },
+                onFailure = { showSnack(it) }
+            )
         } else {
             requester.sendRequest(
                 request = { requester.deleteAccount() },
-                onSuccess = {
-                    clearSession(
-                        onClear = onDelete
-                    )
-                },
+                onSuccess = { successAction.invoke() },
                 onFailure = { showSnack(it) }
             )
         }

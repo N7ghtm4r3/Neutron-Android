@@ -94,4 +94,7 @@
     <string name="password_not_valid">Password not valid</string>
     <string name="title_not_valid">Title not valid</string>
     <string name="description_not_valid">Description not valid</string>
+    <string name="not_authorized_or_wrong_details">Not authorized or wrong details</string>
+    <string name="wrong_procedure">Wrong procedure</string>
+    <string name="operation_executed_successfully">Operation executed successfully</string>
 </resources>

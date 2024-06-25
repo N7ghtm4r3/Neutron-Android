@@ -9,6 +9,8 @@ import com.tecknobit.apimanager.formatters.JsonHelper
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.androidLocalServer
 import com.tecknobit.neutron.activities.navigation.Splashscreen.Companion.localUser
 import com.tecknobit.neutron.activities.session.MainActivity
+import com.tecknobit.neutron.helpers.AndroidNeutronRequester
+import com.tecknobit.neutron.helpers.local.storage.AndroidLocalServer
 import com.tecknobit.neutroncore.helpers.Endpoints.BASE_ENDPOINT
 import com.tecknobit.neutroncore.helpers.InputValidator.DEFAULT_LANGUAGE
 import com.tecknobit.neutroncore.helpers.InputValidator.LANGUAGES_SUPPORTED
@@ -77,7 +79,7 @@ class ConnectActivityViewModel(
             else
                 currentLanguageTag
             if (storeDataOnline.value) {
-                requester.changeHost(host.value + BASE_ENDPOINT)
+                instantiateRequester()
                 requester.sendRequest(
                     request = {
                         requester.signUp(
@@ -100,6 +102,7 @@ class ConnectActivityViewModel(
                     onFailure = { showSnack(it) }
                 )
             } else {
+                instantiateLocalServer()
                 androidLocalServer.signUp(
                     name.value,
                     surname.value,
@@ -109,8 +112,8 @@ class ConnectActivityViewModel(
                     onSuccess = { response ->
                         launchApp(
                             response = response,
-                            name.value,
-                            surname.value,
+                            name = name.value,
+                            surname = surname.value,
                             language = language
                         )
                     },
@@ -162,7 +165,7 @@ class ConnectActivityViewModel(
     private fun signIn() {
         if (signInFormIsValid()) {
             if (storeDataOnline.value) {
-                requester.changeHost(host.value + BASE_ENDPOINT)
+                instantiateRequester()
                 requester.sendRequest(
                     request = {
                         requester.signIn(
@@ -181,8 +184,20 @@ class ConnectActivityViewModel(
                     onFailure = { showSnack(it) }
                 )
             } else {
-                // TODO: EXECUTE THE LOCAL SIGN IN
-
+                instantiateLocalServer()
+                androidLocalServer.signIn(
+                    email.value,
+                    password.value,
+                    onSuccess = { response ->
+                        launchApp(
+                            response = response,
+                            name = response.getString(NAME_KEY),
+                            surname = response.getString(SURNAME_KEY),
+                            language = response.getString(LANGUAGE_KEY)
+                        )
+                    },
+                    onFailure = { showSnack(it) }
+                )
             }
         }
     }
@@ -243,6 +258,20 @@ class ConnectActivityViewModel(
             response
         )
         context.startActivity(Intent(context, MainActivity::class.java))
+    }
+
+    private fun instantiateRequester() {
+        requester = AndroidNeutronRequester(
+            host = host.value + BASE_ENDPOINT
+        )
+    }
+
+    private fun instantiateLocalServer() {
+        androidLocalServer = AndroidLocalServer(
+            context = context,
+            userId = null,
+            userToken = null
+        )
     }
 
 }

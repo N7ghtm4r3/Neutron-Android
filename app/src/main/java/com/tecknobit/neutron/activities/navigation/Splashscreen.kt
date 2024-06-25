@@ -235,18 +235,20 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
             MainActivity::class.java
         else
             ConnectActivity::class.java
-        if (localUser.hasLocalStorageSet()) {
-            androidLocalServer = AndroidLocalServer(
-                this@Splashscreen,
-                userId,
-                token
-            )
-        } else {
-            requester = AndroidNeutronRequester(
-                host = localUser.hostAddress,
-                userId = userId,
-                userToken = token
-            )
+        if (isAuthenticated) {
+            if (localUser.hasLocalStorageSet()) {
+                androidLocalServer = AndroidLocalServer(
+                    this@Splashscreen,
+                    userId,
+                    token
+                )
+            } else {
+                requester = AndroidNeutronRequester(
+                    host = localUser.hostAddress,
+                    userId = userId,
+                    userToken = token
+                )
+            }
         }
         return firstScreen
     }

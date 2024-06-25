@@ -77,9 +77,9 @@
     <string name="currency">Moneda</string>
     <string name="disconnect">Desconecte</string>
     <string name="execute">Ejecute</string>
-    <string name="transferring_data">Transferencia de datos...</string>
+    <string name="transferring_data">Transferencia de datos…</string>
     <string name="transfer_executed_successfully">¡Transferencia ejecutada con éxito!</string>
-    <string name="transfer_failed">Transferencia fallida...</string>
+    <string name="transfer_failed">Transferencia fallida…</string>
     <string name="retry">Reintentar</string>
     <string name="no_revenues_yet">Aún no hay ingresos</string>
     <string name="no_tickets_yet">Aún no hay entradas</string>

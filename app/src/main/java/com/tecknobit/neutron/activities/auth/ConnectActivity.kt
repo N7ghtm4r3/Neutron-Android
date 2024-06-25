@@ -81,14 +81,16 @@ import com.tecknobit.neutroncore.helpers.InputValidator.isNameValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isServerSecretValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isSurnameValid
+import com.tecknobit.neutroncore.helpers.local.LNeutronController.Companion.LOCAL_DATABASE_NAME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.util.Random
 
 class ConnectActivity : ComponentActivity() {
 
-    private var localDatabaseNotExists: Boolean = true
+    private val localDatabaseNotExists by lazy {
+        !applicationContext.getDatabasePath(LOCAL_DATABASE_NAME).exists()
+    }
 
     private val snackbarHostState by lazy {
         SnackbarHostState()
@@ -106,7 +108,6 @@ class ConnectActivity : ComponentActivity() {
             viewModel.isSignUp = remember { mutableStateOf(true) }
             viewModel.storeDataOnline = remember { mutableStateOf(false) }
             viewModel.showQrCodeLogin = remember { mutableStateOf(false) }
-            localDatabaseNotExists = Random().nextBoolean() // TODO: TO INIT CORRECTLY FETCHING THE DATABASE
             viewModel.host = remember { mutableStateOf("") }
             viewModel.hostError = remember { mutableStateOf(false) }
             viewModel.serverSecret = remember { mutableStateOf("") }
