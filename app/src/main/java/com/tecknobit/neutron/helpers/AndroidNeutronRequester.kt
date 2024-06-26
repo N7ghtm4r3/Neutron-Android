@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import com.tecknobit.apimanager.annotations.RequestPath
 import com.tecknobit.apimanager.apis.APIRequest.RequestMethod.POST
 import com.tecknobit.apimanager.apis.sockets.SocketManager.StandardResponseCode.GENERIC_RESPONSE
+import com.tecknobit.equinox.Requester
 import com.tecknobit.neutroncore.helpers.Endpoints
 import com.tecknobit.neutroncore.helpers.NeutronRequester
 import com.tecknobit.neutroncore.records.User.PROFILE_PIC_KEY
@@ -25,6 +26,17 @@ import javax.net.ssl.SSLSession
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
+/**
+ * The **AndroidNeutronRequester** class is useful to communicate with the Neutron's backend
+ *
+ * @param host: the host where is running the Neutron's backend
+ * @param userId: the user identifier
+ * @param userToken: the user token
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see Requester
+ * @see NeutronRequester
+ */
 class AndroidNeutronRequester(
     host: String,
     userId: String? = null,

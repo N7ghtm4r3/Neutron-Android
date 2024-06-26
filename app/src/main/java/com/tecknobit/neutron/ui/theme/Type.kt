@@ -6,12 +6,18 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import com.tecknobit.neutron.R
 
+/**
+ * **provider** -> the provider of Google fonts
+ */
 val provider = GoogleFont.Provider(
     providerAuthority = "com.google.android.gms.fonts",
     providerPackage = "com.google.android.gms",
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
+/**
+ * **bodyFontFamily** -> the Neutron's body font family
+ */
 val bodyFontFamily = FontFamily(
     Font(
         googleFont = GoogleFont("Anek Telugu"),
@@ -19,6 +25,9 @@ val bodyFontFamily = FontFamily(
     )
 )
 
+/**
+ * **displayFontFamily** -> the Neutron's font family
+ */
 val displayFontFamily = FontFamily(
     Font(
         googleFont = GoogleFont("Lilita One"),
@@ -26,8 +35,14 @@ val displayFontFamily = FontFamily(
     )
 )
 
+/**
+ * **baseline** -> the Neutron's baseline
+ */
 val baseline = Typography()
 
+/**
+ * **Typography** -> the Neutron's Typography
+ */
 val AppTypography = Typography(
     displayLarge = baseline.displayLarge.copy(fontFamily = displayFontFamily),
     displayMedium = baseline.displayMedium.copy(fontFamily = displayFontFamily),

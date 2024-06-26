@@ -1,6 +1,9 @@
 package com.tecknobit.neutron.ui.theme
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Set of default light theme colors
+ */
 val primaryLight = Color(0xFF4C662B)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFCDEDA3)
@@ -37,6 +40,9 @@ val surfaceContainerLight = Color(0xFFEEEFE3)
 val surfaceContainerHighLight = Color(0xFFE8E9DE)
 val surfaceContainerHighestLight = Color(0xFFE2E3D8)
 
+/**
+ * Set of default medium light theme colors
+ */
 val primaryLightMediumContrast = Color(0xFF314A12)
 val onPrimaryLightMediumContrast = Color(0xFFFFFFFF)
 val primaryContainerLightMediumContrast = Color(0xFF617D3F)
@@ -73,6 +79,9 @@ val surfaceContainerLightMediumContrast = Color(0xFFEEEFE3)
 val surfaceContainerHighLightMediumContrast = Color(0xFFE8E9DE)
 val surfaceContainerHighestLightMediumContrast = Color(0xFFE2E3D8)
 
+/**
+ * Set of default high contrast light theme colors
+ */
 val primaryLightHighContrast = Color(0xFF142700)
 val onPrimaryLightHighContrast = Color(0xFFFFFFFF)
 val primaryContainerLightHighContrast = Color(0xFF314A12)
@@ -109,6 +118,9 @@ val surfaceContainerLightHighContrast = Color(0xFFEEEFE3)
 val surfaceContainerHighLightHighContrast = Color(0xFFE8E9DE)
 val surfaceContainerHighestLightHighContrast = Color(0xFFE2E3D8)
 
+/**
+ * Set of default dark theme colors
+ */
 val primaryDark = Color(0xFFB1D18A)
 val onPrimaryDark = Color(0xFF1F3701)
 val primaryContainerDark = Color(0xFF354E16)
@@ -145,6 +157,9 @@ val surfaceContainerDark = Color(0xFF1E201A)
 val surfaceContainerHighDark = Color(0xFF282B24)
 val surfaceContainerHighestDark = Color(0xFF33362E)
 
+/**
+ * Set of default medium contrast dark theme colors
+ */
 val primaryDarkMediumContrast = Color(0xFFB5D58E)
 val onPrimaryDarkMediumContrast = Color(0xFF0C1A00)
 val primaryContainerDarkMediumContrast = Color(0xFF7D9A59)
@@ -181,6 +196,9 @@ val surfaceContainerDarkMediumContrast = Color(0xFF1E201A)
 val surfaceContainerHighDarkMediumContrast = Color(0xFF282B24)
 val surfaceContainerHighestDarkMediumContrast = Color(0xFF33362E)
 
+/**
+ * Set of default high contrast dark theme colors
+ */
 val primaryDarkHighContrast = Color(0xFFF4FFDF)
 val onPrimaryDarkHighContrast = Color(0xFF000000)
 val primaryContainerDarkHighContrast = Color(0xFFB5D58E)
