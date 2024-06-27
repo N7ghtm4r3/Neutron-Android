@@ -16,13 +16,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.tecknobit.apimanager.annotations.Structure
 
+/**
+ * The **NeutronActivity** class is useful to create an activity with the behavior to show the UI
+ * data correctly
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see ComponentActivity
+ */
+@Structure
 abstract class NeutronActivity : ComponentActivity() {
 
+    /**
+     * *snackbarHostState* -> the host to launch the snackbar messages
+     */
     protected val snackbarHostState by lazy {
         SnackbarHostState()
     }
 
+    /**
+     * Function to display the content of an activity
+     *
+     * @param modifier: custom modifier to apply to the container [Column]
+     * @param contentPadding: the padding to apply to the content
+     * @param cardHeight: height of the container [Card]
+     * @param cardContent: the content of the [Card] used as top bar
+     * @param uiContent: the content to display in the activity
+     */
     @Composable
     protected fun DisplayContent(
         modifier: Modifier = Modifier,

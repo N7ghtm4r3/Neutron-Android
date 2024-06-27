@@ -67,14 +67,28 @@ import javax.net.ssl.SSLSession
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-
+/**
+ * The **Splashscreen** class is the entry point of the application
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see AppCompatActivity
+ * @see ImageLoaderFactory
+ */
 @SuppressLint("CustomSplashScreen")
 class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
 
     companion object {
 
+        /**
+         * **localUser** the user of the current logged in session, used to make the requests to the
+         * backed
+         */
         lateinit var localUser: AndroidLocalUser
 
+        /**
+         * **authWitBiometricParams** whether the biometric authentication must be effectuated because
+         * it's the first launch of the application
+         */
         private var authWitBiometricParams: Boolean = true
 
     }
@@ -99,6 +113,16 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
         BiometricPromptManager(this)
     }
 
+    /**
+     * On create method
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     * If your ComponentActivity is annotated with {@link ContentView}, this will
+     * call {@link #setContentView(int)} for you.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         localUser = AndroidLocalUser(this)
@@ -202,7 +226,7 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
     }
 
     /**
-     * Method to check if there are some update available to install
+     * Function to check if there are some update available to install
      *
      * No-any params required
      */
@@ -224,6 +248,12 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
         }
     }
 
+    /**
+     * Function to get the first activity to display, this is based on whether the [localUser]
+     * is already authenticated or not
+     *
+     * No-any params required
+     */
     private fun getFirstScreen() : Class<*> {
         val firstScreen = if (localUser.isAuthenticated)
             MainActivity::class.java

@@ -58,17 +58,39 @@ import com.tecknobit.neutroncore.helpers.InputValidator.isPasswordValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isServerSecretValid
 import com.tecknobit.neutroncore.helpers.InputValidator.isSurnameValid
 
+/**
+ * The **ConnectActivity** class is useful to manage the authentication requests of the user
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see ComponentActivity
+ */
 class ConnectActivity : ComponentActivity() {
 
+    /**
+     * *snackbarHostState* -> the host to launch the snackbar messages
+     */
     private val snackbarHostState by lazy {
         SnackbarHostState()
     }
 
+    /**
+     * *viewModel* -> the support view model to manage the requests to the backend
+     */
     private val viewModel = ConnectActivityViewModel(
         context = this,
         snackbarHostState = snackbarHostState
     )
 
+    /**
+     * On create method
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     * If your ComponentActivity is annotated with {@link ContentView}, this will
+     * call {@link #setContentView(int)} for you.
+     */
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,6 +129,11 @@ class ConnectActivity : ComponentActivity() {
         })
     }
 
+    /**
+     * Function to create the header section of the activity
+     *
+     * No-any params required
+     */
     @Composable
     private fun HeaderSection() {
         Column (
@@ -180,6 +207,11 @@ class ConnectActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Function to create the form where the user can fill it with his credentials
+     *
+     * No-any params required
+     */
     @Composable
     private fun FormSection() {
         Column (

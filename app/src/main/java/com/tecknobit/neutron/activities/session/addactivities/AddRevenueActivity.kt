@@ -75,28 +75,66 @@ import java.util.Calendar.HOUR
 import java.util.Calendar.HOUR_OF_DAY
 import java.util.Calendar.MINUTE
 
+/**
+ * The **AddRevenueActivity** class is the activity where the user can create and insert a new revenue
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see ComponentActivity
+ */
 abstract class AddRevenueActivity: ComponentActivity() {
 
+    /**
+     * *calendar* -> the helper used to validate the date values inserted
+     */
     private val calendar: Calendar = Calendar.getInstance()
 
+    /**
+     * *formatter* -> the helper used to format the time values
+     */
     protected val formatter: TimeFormatter = TimeFormatter.getInstance()
 
+    /**
+     * *dateFormat* -> the pattern to use to format the date
+     */
     protected val dateFormat = "dd/MM/yyyy"
 
+    /**
+     * *timeFormat* -> the pattern to use to format the time
+     */
     protected val timeFormat = "HH:mm:ss"
 
+    /**
+     * *showKeyboard* -> whether display the keyboard
+     */
     protected lateinit var showKeyboard: MutableState<Boolean>
 
+    /**
+     * *revenueValue* -> the value of the revenue to add
+     */
     private lateinit var revenueValue: MutableState<String>
 
+    /**
+     * *digits* -> the queue of the current decimal digits inserted in the [revenueValue]
+     */
     private val digits : ArrayDeque<Int> = ArrayDeque()
 
+    /**
+     * *reviewManager* -> the manager used to allow the user to review the application in app
+     */
     private lateinit var reviewManager: ReviewManager
 
+    /**
+     * *snackbarHostState* -> the host to launch the snackbar messages
+     */
     protected val snackbarHostState by lazy {
         SnackbarHostState()
     }
 
+    /**
+     * Function to display the section where the user can insert the revenue data
+     *
+     * @param revenueValue: the value of the revenue to add
+     */
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -174,6 +212,11 @@ abstract class AddRevenueActivity: ComponentActivity() {
         }
     }
 
+    /**
+     * Function to display a custom digits keyboard on screen
+     *
+     * No-any params required
+     */
     @Composable
     protected fun Keyboard() {
         AnimatedVisibility(
@@ -279,6 +322,12 @@ abstract class AddRevenueActivity: ComponentActivity() {
         }
     }
 
+    /**
+     * Function to create a button for the custom [Keyboard] to insert a number value
+     *
+     * @param modifier: the modifier to apply to the button
+     * @param number: the value of the number to apply to the button
+     */
     @Wrapper
     @Composable
     protected fun NumberKeyboardButton(
@@ -301,6 +350,14 @@ abstract class AddRevenueActivity: ComponentActivity() {
         )
     }
 
+    /**
+     * Function to create a button for the custom [Keyboard] to execute any action
+     *
+     * @param modifier: the modifier to apply to the button
+     * @param onClick: the action to execute when the button has been clicked
+     * @param text: the text of the button
+     * @param fontSize: the font size of the [text]
+     */
     @Composable
     protected fun KeyboardButton(
         modifier: Modifier,
@@ -319,6 +376,13 @@ abstract class AddRevenueActivity: ComponentActivity() {
         }
     }
 
+    /**
+     * Function to create a button for the custom [Keyboard] to execute an action
+     *
+     * @param modifier: the modifier to apply to the button
+     * @param action: the action to execute when the button has been clicked
+     * @param icon: the icon of the button
+     */
     @Composable
     protected fun ActionButton(
         modifier: Modifier = Modifier,
@@ -341,9 +405,22 @@ abstract class AddRevenueActivity: ComponentActivity() {
         }
     }
 
+    /**
+     * Function to display the form where the user can insert the details of the revenue to add,
+     * so will be different if the revenue is a [GeneralRevenue] or it will be a [ProjectRevenue]
+     *
+     * No-any params required
+     */
     @Composable
     protected abstract fun InputForm()
 
+    /**
+     * Function to display a temporal value
+     *
+     * @param info: the info displayed
+     * @param infoValue: value of the time info displayed
+     * @param onClick: the action to execute when the button has been clicked
+     */
     @Composable
     protected fun TimeInfo(
         info: Int,
@@ -395,6 +472,18 @@ abstract class AddRevenueActivity: ComponentActivity() {
         }
     }
 
+    /**
+     * Function to display the section of a temporal value
+     *
+     * @param dateTitle: the title for the date section
+     * @param date: the date value
+     * @param displayDatePickerDialog: whether display the [DatePickerDialog]
+     * @param dateState: the state attached to the [displayDatePickerDialog]
+     * @param timeTitle: the title for the time section
+     * @param time: the time value
+     * @param displayTimePickerDialog: whether display the [TimePickerDialog]
+     * @param timePickerState: the state attached to the [displayTimePickerDialog]
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     protected fun TimeInfoSection(
@@ -460,6 +549,11 @@ abstract class AddRevenueActivity: ComponentActivity() {
         )
     }
 
+    /**
+     * Function to get a [TimePickerState] to use
+     *
+     * No-any params required
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     protected fun getTimePickerState(): TimePickerState {
@@ -472,6 +566,14 @@ abstract class AddRevenueActivity: ComponentActivity() {
         )
     }
 
+    /**
+     * Function to display the dialog to insert the time value
+     *
+     * @param showTimePicker: whether display the [TimePickerDialog]
+     * @param timeState: the state attached to the [TimePickerDialog]
+     * @param confirmAction: the action to execute when the user confirmed
+     *
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     protected fun TimePickerDialog(
@@ -506,6 +608,11 @@ abstract class AddRevenueActivity: ComponentActivity() {
         }
     }
 
+    /**
+     * Function to execute the back navigation from the current activity to the previous activity
+     *
+     * No-any params required
+     */
     protected abstract fun navBack()
 
     /**

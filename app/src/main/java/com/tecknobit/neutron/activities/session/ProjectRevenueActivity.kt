@@ -46,14 +46,38 @@ import com.tecknobit.neutroncore.records.NeutronItem.IDENTIFIER_KEY
 import com.tecknobit.neutroncore.records.revenues.GeneralRevenue
 import com.tecknobit.neutroncore.records.revenues.ProjectRevenue
 
+/**
+ * The **ProjectRevenueActivity** class is the activity where the user can show a project with its
+ * details and ticket
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see NeutronActivity
+ * @see ComponentActivity
+ */
 class ProjectRevenueActivity : NeutronActivity() {
 
+    /**
+     * *projectRevenue* -> the current project revenue displayed
+     */
     private lateinit var projectRevenue: State<ProjectRevenue?>
 
+    /**
+     * *viewModel* -> the support view model to manage the requests to the backend
+     */
     private val viewModel: ProjectRevenueActivityViewModel = ProjectRevenueActivityViewModel(
         snackbarHostState = snackbarHostState
     )
 
+    /**
+     * On create method
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     * If your ComponentActivity is annotated with {@link ContentView}, this will
+     * call {@link #setContentView(int)} for you.
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -166,6 +190,11 @@ class ProjectRevenueActivity : NeutronActivity() {
         })
     }
 
+    /**
+     * Function to display the section to delete the current project displayed
+     *
+     * No-any params required
+     */
     @Composable
     private fun DeleteProjectRevenue() {
         if (viewModel.showDeleteProject.value)
@@ -187,10 +216,43 @@ class ProjectRevenueActivity : NeutronActivity() {
         )
     }
 
+    /**
+     * Function to execute the back navigation from the current activity to the previous activity
+     *
+     * No-any params required
+     */
     private fun navBack() {
         startActivity(Intent(this@ProjectRevenueActivity, MainActivity::class.java))
     }
 
+    /**
+     * Called after {@link #onRestoreInstanceState}, {@link #onRestart}, or {@link #onPause}. This
+     * is usually a hint for your activity to start interacting with the user, which is a good
+     * indicator that the activity became active and ready to receive input. This sometimes could
+     * also be a transit state toward another resting state. For instance, an activity may be
+     * relaunched to {@link #onPause} due to configuration changes and the activity was visible,
+     * but wasn’t the top-most activity of an activity task. {@link #onResume} is guaranteed to be
+     * called before {@link #onPause} in this case which honors the activity lifecycle policy and
+     * the activity eventually rests in {@link #onPause}.
+     *
+     * <p>On platform versions prior to {@link android.os.Build.VERSION_CODES#Q} this is also a good
+     * place to try to open exclusive-access devices or to get access to singleton resources.
+     * Starting  with {@link android.os.Build.VERSION_CODES#Q} there can be multiple resumed
+     * activities in the system simultaneously, so {@link #onTopResumedActivityChanged(boolean)}
+     * should be used for that purpose instead.
+     *
+     * <p><em>Derived classes must call through to the super class's
+     * implementation of this method.  If they do not, an exception will be
+     * thrown.</em></p>
+     *
+     * Will be set the **[FetcherManager.activeContext]** with the current context
+     *
+     * @see #onRestoreInstanceState
+     * @see #onRestart
+     * @see #onPostResume
+     * @see #onPause
+     * @see #onTopResumedActivityChanged(boolean)
+     */
     override fun onResume() {
         super.onResume()
         viewModel.setActiveContext(this)

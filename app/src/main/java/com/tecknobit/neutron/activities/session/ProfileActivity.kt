@@ -11,7 +11,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -34,7 +32,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AutoMode
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Flag
@@ -44,7 +41,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -67,7 +63,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -99,14 +94,37 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import kotlin.math.min
 
+/**
+ * The **ProfileActivity** class is the activity where the user manage his/her profile account
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see NeutronActivity
+ * @see ComponentActivity
+ */
 class ProfileActivity : NeutronActivity() {
 
+    /**
+     * *theme* -> the current user's theme
+     */
     private lateinit var theme: MutableState<ApplicationTheme>
 
+    /**
+     * *viewModel* -> the support view model to manage the requests to the backend
+     */
     private val viewModel = ProfileActivityViewModel(
         snackbarHostState = snackbarHostState
     )
 
+    /**
+     * On create method
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     * If your ComponentActivity is annotated with {@link ContentView}, this will
+     * call {@link #setContentView(int)} for you.
+     */
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -382,6 +400,14 @@ class ProfileActivity : NeutronActivity() {
         }
     }
 
+    /**
+     * Function to display a specific info details of the user
+     *
+     * @param header: the header of the info to display
+     * @param info: the info details value to display
+     * @param buttonText: the text of the setting button
+     * @param onClick: the action to execute when the [buttonText] has been clicked
+     */
     @Composable
     private fun UserInfo(
         header: Int,
@@ -437,6 +463,11 @@ class ProfileActivity : NeutronActivity() {
         HorizontalDivider()
     }
 
+    /**
+     * Function to allow the user to change the current language setting
+     *
+     * @param changeLanguage: the state whether display this section
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ChangeLanguage(
@@ -482,6 +513,12 @@ class ProfileActivity : NeutronActivity() {
         }
     }
 
+    /**
+     * Function to allow the user to change the current currency setting
+     *
+     * @param changeCurrency: the state whether display this section
+     * @param currencyValue: the current value of the currency used by the user
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ChangeCurrency(
@@ -528,6 +565,11 @@ class ProfileActivity : NeutronActivity() {
         }
     }
 
+    /**
+     * Function to allow the user to change the current theme setting
+     *
+     * @param changeTheme: the state whether display this section
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ChangeTheme(
@@ -577,6 +619,14 @@ class ProfileActivity : NeutronActivity() {
         }
     }
 
+    /**
+     * Function to allow the user to change a current setting
+     *
+     * @param showModal: the state whether display the [ModalBottomSheet]
+     * @param sheetState: the state to apply to the [ModalBottomSheet]
+     * @param onDismissRequest: the action to execute when the the [ModalBottomSheet] has been dismissed
+     * @param content: the content to display
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ChangeInfo(
@@ -639,66 +689,53 @@ class ProfileActivity : NeutronActivity() {
         return file.path
     }
 
-    @Composable
-    private fun ResponseStatusUI(
-        isWaiting: MutableState<Boolean>,
-        statusText: Int,
-        isSuccessful: MutableState<Boolean>,
-        successText: Int,
-        failedText: Int
-    ) {
-        if(isWaiting.value) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .padding(
-                        top = 20.dp
-                    )
-                    .size(75.dp)
-            )
-            Text(
-                modifier = Modifier
-                    .padding(
-                        top = 10.dp
-                    ),
-                text = stringResource(statusText),
-                fontSize = 14.sp
-            )
-        } else {
-            Image(
-                modifier = Modifier
-                    .size(125.dp),
-                imageVector = if(isSuccessful.value)
-                    Icons.Default.CheckCircle
-                else
-                    Icons.Default.Cancel,
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = if(isSuccessful.value)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.error
-                )
-            )
-            Text(
-                text = stringResource(
-                    if (isSuccessful.value)
-                        successText
-                    else
-                        failedText
-                ),
-                fontSize = 14.sp
-            )
-        }
-    }
-
+    /**
+     * Function to execute the back navigation from the current activity to the previous activity
+     *
+     * No-any params required
+     */
     private fun navBack() {
         startActivity(Intent(this, MainActivity::class.java))
     }
 
+    /**
+     * Function to execute the back navigation from the [Splashscreen] activity after user changed any
+     * setting which required the refresh of the [localUser]
+     *
+     * No-any params required
+     */
     private fun navToSplash() {
         startActivity(Intent(this@ProfileActivity, Splashscreen::class.java))
     }
 
+    /**
+     * Called after {@link #onRestoreInstanceState}, {@link #onRestart}, or {@link #onPause}. This
+     * is usually a hint for your activity to start interacting with the user, which is a good
+     * indicator that the activity became active and ready to receive input. This sometimes could
+     * also be a transit state toward another resting state. For instance, an activity may be
+     * relaunched to {@link #onPause} due to configuration changes and the activity was visible,
+     * but wasn’t the top-most activity of an activity task. {@link #onResume} is guaranteed to be
+     * called before {@link #onPause} in this case which honors the activity lifecycle policy and
+     * the activity eventually rests in {@link #onPause}.
+     *
+     * <p>On platform versions prior to {@link android.os.Build.VERSION_CODES#Q} this is also a good
+     * place to try to open exclusive-access devices or to get access to singleton resources.
+     * Starting  with {@link android.os.Build.VERSION_CODES#Q} there can be multiple resumed
+     * activities in the system simultaneously, so {@link #onTopResumedActivityChanged(boolean)}
+     * should be used for that purpose instead.
+     *
+     * <p><em>Derived classes must call through to the super class's
+     * implementation of this method.  If they do not, an exception will be
+     * thrown.</em></p>
+     *
+     * Will be set the **[FetcherManager.activeContext]** with the current context
+     *
+     * @see #onRestoreInstanceState
+     * @see #onRestart
+     * @see #onPostResume
+     * @see #onPause
+     * @see #onTopResumedActivityChanged(boolean)
+     */
     override fun onResume() {
         super.onResume()
         viewModel.setActiveContext(this)

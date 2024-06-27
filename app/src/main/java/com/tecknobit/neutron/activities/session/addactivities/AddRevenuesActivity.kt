@@ -3,6 +3,7 @@ package com.tecknobit.neutron.activities.session.addactivities
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -67,12 +68,33 @@ import com.tecknobit.neutroncore.helpers.InputValidator.isRevenueDescriptionVali
 import com.tecknobit.neutroncore.helpers.InputValidator.isRevenueTitleValid
 import com.tecknobit.neutroncore.records.revenues.RevenueLabel
 
+/**
+ * The **AddRevenuesActivity** class is the activity where the user can create and insert a new
+ * general revenue
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see AddRevenueActivity
+ * @see ComponentActivity
+ */
 class AddRevenuesActivity : AddRevenueActivity() {
 
+    /**
+     * *viewModel* -> the support view model to manage the requests to the backend
+     */
     private val viewModel = AddRevenuesViewModel(
         snackbarHostState = snackbarHostState
     )
 
+    /**
+     * On create method
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     * If your ComponentActivity is annotated with {@link ContentView}, this will
+     * call {@link #setContentView(int)} for you.
+     */
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +106,12 @@ class AddRevenuesActivity : AddRevenueActivity() {
         }
     }
 
+    /**
+     * Function to display the form where the user can insert the details of the revenue to add,
+     * so will be different if the revenue is a [GeneralRevenue] or it will be a [ProjectRevenue]
+     *
+     * No-any params required
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun InputForm() {
@@ -210,6 +238,11 @@ class AddRevenuesActivity : AddRevenueActivity() {
         }
     }
 
+    /**
+     * Function to display and manage the labels attached to the general revenue that has being creating
+     *
+     * @param labels: the current labels list
+     */
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun Labels(
@@ -270,6 +303,12 @@ class AddRevenuesActivity : AddRevenueActivity() {
         }
     }
 
+    /**
+     * Function to display the form where the user can customize the label to attach to the revenue
+     *
+     * @param showAddLabel: whether show this form
+     * @param labels: the current labels list
+     */
     @Composable
     private fun AddLabel(
         showAddLabel: MutableState<Boolean>,
@@ -369,6 +408,12 @@ class AddRevenuesActivity : AddRevenueActivity() {
         }
     }
 
+    /**
+     * Function to execute the back navigation from the current activity to the previous activity, but
+     * will be checked if the user can review the app
+     *
+     * No-any params required
+     */
     override fun navBack() {
         reviewInApp(
             flowAction = {
@@ -377,6 +422,34 @@ class AddRevenuesActivity : AddRevenueActivity() {
         )
     }
 
+    /**
+     * Called after {@link #onRestoreInstanceState}, {@link #onRestart}, or {@link #onPause}. This
+     * is usually a hint for your activity to start interacting with the user, which is a good
+     * indicator that the activity became active and ready to receive input. This sometimes could
+     * also be a transit state toward another resting state. For instance, an activity may be
+     * relaunched to {@link #onPause} due to configuration changes and the activity was visible,
+     * but wasn’t the top-most activity of an activity task. {@link #onResume} is guaranteed to be
+     * called before {@link #onPause} in this case which honors the activity lifecycle policy and
+     * the activity eventually rests in {@link #onPause}.
+     *
+     * <p>On platform versions prior to {@link android.os.Build.VERSION_CODES#Q} this is also a good
+     * place to try to open exclusive-access devices or to get access to singleton resources.
+     * Starting  with {@link android.os.Build.VERSION_CODES#Q} there can be multiple resumed
+     * activities in the system simultaneously, so {@link #onTopResumedActivityChanged(boolean)}
+     * should be used for that purpose instead.
+     *
+     * <p><em>Derived classes must call through to the super class's
+     * implementation of this method.  If they do not, an exception will be
+     * thrown.</em></p>
+     *
+     * Will be set the **[FetcherManager.activeContext]** with the current context
+     *
+     * @see #onRestoreInstanceState
+     * @see #onRestart
+     * @see #onPostResume
+     * @see #onPause
+     * @see #onTopResumedActivityChanged(boolean)
+     */
     override fun onResume() {
         super.onResume()
         viewModel.setActiveContext(this)
