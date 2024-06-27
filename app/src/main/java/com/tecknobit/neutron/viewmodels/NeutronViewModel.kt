@@ -3,6 +3,7 @@ package com.tecknobit.neutron.viewmodels
 import android.content.Context
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
+import com.tecknobit.apimanager.annotations.Structure
 import com.tecknobit.apimanager.formatters.JsonHelper
 import com.tecknobit.equinox.FetcherManager
 import com.tecknobit.equinox.FetcherManager.Companion.activeContext
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
  * @see ViewModel
  * @see FetcherManagerWrapper
  */
+@Structure
 open class NeutronViewModel(
     protected val snackbarHostState: SnackbarHostState
 ) : ViewModel(), FetcherManagerWrapper {

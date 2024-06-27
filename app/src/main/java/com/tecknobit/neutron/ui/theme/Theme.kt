@@ -262,7 +262,7 @@ private val highContrastDarkColorScheme = darkColorScheme(
 /**
  * Function to set the Neutron theme to the content
  *
- * @param darkTheme: whether use the dark or light theme
+ * @param darkTheme: whether to use the dark or light theme
  * @param content: the content to display
  */
 @Composable

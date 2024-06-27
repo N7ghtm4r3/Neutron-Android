@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.play.core.review.ReviewManager
 import com.google.android.play.core.review.ReviewManagerFactory
+import com.tecknobit.apimanager.annotations.Structure
 import com.tecknobit.apimanager.annotations.Wrapper
 import com.tecknobit.apimanager.formatters.TimeFormatter
 import com.tecknobit.neutron.R
@@ -81,6 +82,7 @@ import java.util.Calendar.MINUTE
  * @author N7ghtm4r3 - Tecknobit
  * @see ComponentActivity
  */
+@Structure
 abstract class AddRevenueActivity: ComponentActivity() {
 
     /**
