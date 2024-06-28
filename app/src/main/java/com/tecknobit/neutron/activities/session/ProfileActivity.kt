@@ -208,8 +208,8 @@ class ProfileActivity : NeutronActivity() {
                                         .data(profilePic.value)
                                         .crossfade(true)
                                         .crossfade(500)
+                                        .error(R.drawable.ic_launcher_playstore)
                                         .build(),
-                                    //TODO: USE THE REAL IMAGE ERROR .error(),
                                     contentDescription = null
                                 )
                                 Row (

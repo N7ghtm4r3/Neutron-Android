@@ -170,8 +170,8 @@ class MainActivity : NeutronActivity() {
                                             .data(localUser.profilePic)
                                             .crossfade(true)
                                             .crossfade(500)
+                                            .error(R.mipmap.ic_launcher)
                                             .build(),
-                                        //TODO: USE THE REAL IMAGE ERROR .error(),
                                         contentDescription = null
                                     )
                                 }
