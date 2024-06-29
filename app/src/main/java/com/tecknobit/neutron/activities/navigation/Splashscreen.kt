@@ -4,17 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.StrictMode
-import android.provider.Settings.ACTION_BIOMETRIC_ENROLL
-import android.provider.Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
-import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -49,6 +43,8 @@ import com.tecknobit.neutron.helpers.AndroidNeutronRequester
 import com.tecknobit.neutron.helpers.BiometricPromptManager
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationNotSet
 import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.AuthenticationSuccess
+import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.FeatureUnavailable
+import com.tecknobit.neutron.helpers.BiometricPromptManager.BiometricResult.HardwareUnavailable
 import com.tecknobit.neutron.helpers.local.AndroidLocalUser
 import com.tecknobit.neutron.ui.ErrorUI
 import com.tecknobit.neutron.ui.PROJECT_LABEL
@@ -190,20 +186,9 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
         val biometricResult by biometricPromptManager.promptResults.collectAsState(
             initial = null
         )
-        val enrollLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult(),
-            onResult = {}
-        )
         LaunchedEffect(biometricResult) {
-            if(biometricResult is AuthenticationNotSet) {
-                val enrollIntent = Intent(ACTION_BIOMETRIC_ENROLL).apply {
-                    putExtra(
-                        EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                        BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-                    )
-                }
-                enrollLauncher.launch(enrollIntent)
-            }
+            if (biometricResult is AuthenticationNotSet)
+                checkForUpdates()
         }
         if(biometricResult == null) {
             biometricPromptManager.showBiometricPrompt(
@@ -213,7 +198,8 @@ class Splashscreen : AppCompatActivity(), ImageLoaderFactory {
         }
         biometricResult?.let { result ->
             when(result) {
-                AuthenticationSuccess -> checkForUpdates()
+                AuthenticationSuccess, AuthenticationNotSet, HardwareUnavailable,
+                FeatureUnavailable -> checkForUpdates()
                 else -> {
                     NeutronTheme {
                         ErrorUI(

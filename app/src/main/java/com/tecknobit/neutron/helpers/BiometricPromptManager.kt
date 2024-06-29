@@ -9,6 +9,7 @@ import androidx.biometric.BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE
 import androidx.biometric.BiometricManager.from
 import androidx.biometric.BiometricPrompt
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
@@ -25,7 +26,9 @@ class BiometricPromptManager(
     /**
      * **resultChannel** -> the channel where the result applied
      */
-    private val resultChannel = Channel<BiometricResult>()
+    private val resultChannel = Channel<BiometricResult>(
+        capacity = UNLIMITED
+    )
 
     /**
      * **promptResults** -> the prompts used to apply the result
