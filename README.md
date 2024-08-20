@@ -2,7 +2,7 @@
 
 **v1.0.0**
 
-This project, based on Java and the Spring Boot framework, it's an open source orders and ticket
+This project, based on Java and the Spring Boot framework, it's an open source self-hosted orders and ticket
 revenue manager for the projects
 you are developing
 
